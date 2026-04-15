@@ -465,40 +465,30 @@
     50%{opacity:1; transform:scale(1.2);}
   }
 
-  /* Back skyline (farther, lighter) */
-  .atmos .skyline-back{
-    position:absolute; bottom:0; left:0; right:0;
-    width:100%; height:200px;
-    opacity:.55;
-  }
-  .atmos .skyline-back svg{width:100%; height:100%; display:block;}
-  .atmos .skyline-back path{fill:#1c1512;}
-
-  /* Front skyline (closer, darker) */
-  .atmos .skyline-front{
-    position:absolute; bottom:0; left:0; right:0;
-    width:100%; height:150px;
-    opacity:.95;
-  }
-  .atmos .skyline-front svg{width:100%; height:100%; display:block;}
-  .atmos .skyline-front path{fill:#060606;}
-
-  /* Palm silhouettes at edges */
-  .atmos .palm{
+  /* Miami skyline photograph */
+  .atmos .skyline-photo{
     position:absolute;
-    bottom:0;
-    width:90px; height:240px;
-    opacity:.55;
+    bottom:0; left:0; right:0;
+    width:100%;
+    height:58%;
+    background-image:url("Assets/miami-skyline.jpg");
+    background-size:cover;
+    background-position:center bottom;
+    opacity:.38;
+    mix-blend-mode:screen;
+    filter:saturate(1.1) contrast(1.05);
+    -webkit-mask-image:linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.25) 22%, rgba(0,0,0,.75) 60%, black 100%);
+    mask-image:linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.25) 22%, rgba(0,0,0,.75) 60%, black 100%);
+    animation:skylineDrift 38s ease-in-out infinite alternate;
+    transform-origin:center bottom;
   }
-  .atmos .palm.left{left:2%;}
-  .atmos .palm.right{right:2%; transform:scaleX(-1);}
-  .atmos .palm svg{width:100%; height:100%; display:block;}
-  .atmos .palm path{fill:#000;}
+  @keyframes skylineDrift{
+    from{transform:scale(1) translateX(0);}
+    to{transform:scale(1.04) translateX(-14px);}
+  }
 
   @media (max-width:720px){
-    .atmos .palm{width:60px; height:180px; opacity:.4;}
-    .atmos .skyline-back{height:140px;}
-    .atmos .skyline-front{height:100px;}
+    .atmos .skyline-photo{height:50%; opacity:.32;}
   }
 
   /* ABOUT */
@@ -1105,26 +1095,7 @@
       <span class="spark" style="top:18%; left:60%; animation-delay:1.5s"></span>
       <span class="spark" style="top:22%; left:82%; animation-delay:3.2s"></span>
     </div>
-    <div class="skyline-back">
-      <svg viewBox="0 0 1440 200" preserveAspectRatio="none">
-        <path d="M0,200 L0,140 L40,140 L40,110 L75,110 L75,130 L110,130 L110,95 L145,95 L145,115 L180,115 L180,80 L220,80 L220,60 L248,60 L248,100 L285,100 L285,125 L318,125 L318,90 L355,90 L355,55 L388,55 L388,75 L425,75 L425,115 L460,115 L460,85 L498,85 L498,45 L530,45 L530,30 L548,30 L548,65 L580,65 L580,95 L615,95 L615,70 L650,70 L650,105 L688,105 L688,75 L725,75 L725,40 L762,40 L762,68 L795,68 L795,90 L832,90 L832,55 L870,55 L870,82 L905,82 L905,110 L942,110 L942,70 L978,70 L978,48 L1012,48 L1012,78 L1048,78 L1048,105 L1085,105 L1085,65 L1120,65 L1120,92 L1158,92 L1158,58 L1195,58 L1195,85 L1232,85 L1232,115 L1270,115 L1270,72 L1305,72 L1305,48 L1340,48 L1340,82 L1378,82 L1378,110 L1410,110 L1410,85 L1440,85 L1440,200 Z"/>
-      </svg>
-    </div>
-    <div class="skyline-front">
-      <svg viewBox="0 0 1440 150" preserveAspectRatio="none">
-        <path d="M0,150 L0,90 L30,90 L30,70 L60,70 L60,85 L85,85 L85,58 L110,58 L110,72 L135,72 L135,42 L155,42 L155,26 L172,26 L172,12 L186,12 L186,30 L205,30 L205,56 L230,56 L230,78 L258,78 L258,60 L285,60 L285,38 L310,38 L310,55 L335,55 L335,82 L360,82 L360,48 L385,48 L385,22 L405,22 L405,8 L422,8 L422,28 L445,28 L445,62 L475,62 L475,86 L502,86 L502,42 L530,42 L530,68 L560,68 L560,36 L585,36 L585,18 L605,18 L605,40 L630,40 L630,72 L658,72 L658,48 L685,48 L685,22 L712,22 L712,6 L728,6 L728,32 L752,32 L752,62 L780,62 L780,85 L810,85 L810,52 L838,52 L838,28 L865,28 L865,4 L885,4 L885,30 L910,30 L910,58 L940,58 L940,82 L968,82 L968,45 L995,45 L995,22 L1022,22 L1022,8 L1042,8 L1042,36 L1070,36 L1070,68 L1098,68 L1098,52 L1125,52 L1125,78 L1152,78 L1152,58 L1180,58 L1180,32 L1208,32 L1208,64 L1236,64 L1236,88 L1265,88 L1265,50 L1292,50 L1292,28 L1320,28 L1320,72 L1348,72 L1348,90 L1376,90 L1376,62 L1404,62 L1404,82 L1430,82 L1430,98 L1440,98 L1440,150 Z"/>
-      </svg>
-    </div>
-    <div class="palm left">
-      <svg viewBox="0 0 90 240" preserveAspectRatio="xMidYEnd meet">
-        <path d="M45,240 L43,180 L42,140 L41,110 L40,90 C40,90 25,85 15,70 C10,62 7,55 5,48 C15,52 24,54 32,56 C24,50 18,42 14,32 C22,40 30,44 36,46 C30,38 28,28 28,18 C34,28 40,36 45,42 C50,36 56,28 62,18 C62,28 60,38 54,46 C60,44 68,40 76,32 C72,42 66,50 58,56 C66,54 75,52 85,48 C83,55 80,62 75,70 C65,85 50,90 50,90 L48,110 L47,140 L46,180 Z"/>
-      </svg>
-    </div>
-    <div class="palm right">
-      <svg viewBox="0 0 90 240" preserveAspectRatio="xMidYEnd meet">
-        <path d="M45,240 L43,180 L42,140 L41,110 L40,90 C40,90 25,85 15,70 C10,62 7,55 5,48 C15,52 24,54 32,56 C24,50 18,42 14,32 C22,40 30,44 36,46 C30,38 28,28 28,18 C34,28 40,36 45,42 C50,36 56,28 62,18 C62,28 60,38 54,46 C60,44 68,40 76,32 C72,42 66,50 58,56 C66,54 75,52 85,48 C83,55 80,62 75,70 C65,85 50,90 50,90 L48,110 L47,140 L46,180 Z"/>
-      </svg>
-    </div>
+    <div class="skyline-photo"></div>
   </div>
   <div class="wrap">
     <div class="section-head">
@@ -1207,26 +1178,7 @@
       <span class="spark" style="top:18%; left:60%; animation-delay:1.5s"></span>
       <span class="spark" style="top:22%; left:82%; animation-delay:3.2s"></span>
     </div>
-    <div class="skyline-back">
-      <svg viewBox="0 0 1440 200" preserveAspectRatio="none">
-        <path d="M0,200 L0,140 L40,140 L40,110 L75,110 L75,130 L110,130 L110,95 L145,95 L145,115 L180,115 L180,80 L220,80 L220,60 L248,60 L248,100 L285,100 L285,125 L318,125 L318,90 L355,90 L355,55 L388,55 L388,75 L425,75 L425,115 L460,115 L460,85 L498,85 L498,45 L530,45 L530,30 L548,30 L548,65 L580,65 L580,95 L615,95 L615,70 L650,70 L650,105 L688,105 L688,75 L725,75 L725,40 L762,40 L762,68 L795,68 L795,90 L832,90 L832,55 L870,55 L870,82 L905,82 L905,110 L942,110 L942,70 L978,70 L978,48 L1012,48 L1012,78 L1048,78 L1048,105 L1085,105 L1085,65 L1120,65 L1120,92 L1158,92 L1158,58 L1195,58 L1195,85 L1232,85 L1232,115 L1270,115 L1270,72 L1305,72 L1305,48 L1340,48 L1340,82 L1378,82 L1378,110 L1410,110 L1410,85 L1440,85 L1440,200 Z"/>
-      </svg>
-    </div>
-    <div class="skyline-front">
-      <svg viewBox="0 0 1440 150" preserveAspectRatio="none">
-        <path d="M0,150 L0,90 L30,90 L30,70 L60,70 L60,85 L85,85 L85,58 L110,58 L110,72 L135,72 L135,42 L155,42 L155,26 L172,26 L172,12 L186,12 L186,30 L205,30 L205,56 L230,56 L230,78 L258,78 L258,60 L285,60 L285,38 L310,38 L310,55 L335,55 L335,82 L360,82 L360,48 L385,48 L385,22 L405,22 L405,8 L422,8 L422,28 L445,28 L445,62 L475,62 L475,86 L502,86 L502,42 L530,42 L530,68 L560,68 L560,36 L585,36 L585,18 L605,18 L605,40 L630,40 L630,72 L658,72 L658,48 L685,48 L685,22 L712,22 L712,6 L728,6 L728,32 L752,32 L752,62 L780,62 L780,85 L810,85 L810,52 L838,52 L838,28 L865,28 L865,4 L885,4 L885,30 L910,30 L910,58 L940,58 L940,82 L968,82 L968,45 L995,45 L995,22 L1022,22 L1022,8 L1042,8 L1042,36 L1070,36 L1070,68 L1098,68 L1098,52 L1125,52 L1125,78 L1152,78 L1152,58 L1180,58 L1180,32 L1208,32 L1208,64 L1236,64 L1236,88 L1265,88 L1265,50 L1292,50 L1292,28 L1320,28 L1320,72 L1348,72 L1348,90 L1376,90 L1376,62 L1404,62 L1404,82 L1430,82 L1430,98 L1440,98 L1440,150 Z"/>
-      </svg>
-    </div>
-    <div class="palm left">
-      <svg viewBox="0 0 90 240" preserveAspectRatio="xMidYEnd meet">
-        <path d="M45,240 L43,180 L42,140 L41,110 L40,90 C40,90 25,85 15,70 C10,62 7,55 5,48 C15,52 24,54 32,56 C24,50 18,42 14,32 C22,40 30,44 36,46 C30,38 28,28 28,18 C34,28 40,36 45,42 C50,36 56,28 62,18 C62,28 60,38 54,46 C60,44 68,40 76,32 C72,42 66,50 58,56 C66,54 75,52 85,48 C83,55 80,62 75,70 C65,85 50,90 50,90 L48,110 L47,140 L46,180 Z"/>
-      </svg>
-    </div>
-    <div class="palm right">
-      <svg viewBox="0 0 90 240" preserveAspectRatio="xMidYEnd meet">
-        <path d="M45,240 L43,180 L42,140 L41,110 L40,90 C40,90 25,85 15,70 C10,62 7,55 5,48 C15,52 24,54 32,56 C24,50 18,42 14,32 C22,40 30,44 36,46 C30,38 28,28 28,18 C34,28 40,36 45,42 C50,36 56,28 62,18 C62,28 60,38 54,46 C60,44 68,40 76,32 C72,42 66,50 58,56 C66,54 75,52 85,48 C83,55 80,62 75,70 C65,85 50,90 50,90 L48,110 L47,140 L46,180 Z"/>
-      </svg>
-    </div>
+    <div class="skyline-photo"></div>
   </div>
   <div class="wrap">
     <div class="apply-intro">

@@ -1273,6 +1273,13 @@
 </footer>
 
 <script>
+  // Always start at top on load/refresh
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.addEventListener('beforeunload', () => window.scrollTo(0, 0));
+  window.addEventListener('load', () => {
+    if (!location.hash) window.scrollTo(0, 0);
+  });
+
   // Nav background on scroll
   const nav = document.getElementById('nav');
   const onScroll = () => {

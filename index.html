@@ -235,8 +235,8 @@
   .mission-panel{
     position:relative;
     width:100%;
-    max-width:720px;
-    padding:44px 44px 38px;
+    max-width:560px;
+    padding:28px 32px 26px;
     background:rgba(12,12,12,.48);
     backdrop-filter:blur(10px);
     -webkit-backdrop-filter:blur(10px);
@@ -259,39 +259,39 @@
   .m-label{
     display:flex; align-items:center; justify-content:space-between;
     font-family:var(--mono);
-    font-size:10.5px;
+    font-size:9.5px;
     font-weight:500;
-    letter-spacing:.34em;
+    letter-spacing:.32em;
     text-transform:uppercase;
     color:var(--gold-soft);
-    margin-bottom:22px;
-    padding-bottom:16px;
+    margin-bottom:16px;
+    padding-bottom:12px;
     border-bottom:1px solid rgba(184,151,46,.2);
   }
   .m-label .no{color:var(--plat-2);}
   .m-quote{
     font-weight:400;
-    font-size:clamp(18px, 1.8vw, 22px);
+    font-size:clamp(14px, 1.3vw, 16px);
     line-height:1.55;
     color:var(--off);
-    letter-spacing:-.01em;
+    letter-spacing:-.005em;
   }
   .m-quote .kw{color:var(--gold-soft); font-weight:500;}
   .m-attr{
-    margin-top:24px;
-    display:flex; align-items:center; gap:14px;
+    margin-top:18px;
+    display:flex; align-items:center; gap:12px;
     font-family:var(--mono);
-    font-size:10.5px;
+    font-size:9.5px;
     font-weight:500;
-    letter-spacing:.3em;
+    letter-spacing:.28em;
     text-transform:uppercase;
     color:var(--plat-2);
   }
-  .m-attr::before{content:""; width:28px; height:1px; background:var(--gold);}
+  .m-attr::before{content:""; width:22px; height:1px; background:var(--gold);}
 
   @media (max-width:720px){
-    .mission-panel{padding:28px 24px 26px;}
-    .m-label{font-size:9.5px; letter-spacing:.26em;}
+    .mission-panel{padding:22px 20px 20px;}
+    .m-label{font-size:9px; letter-spacing:.24em;}
   }
 
   .cta{

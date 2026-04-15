@@ -729,6 +729,27 @@
   }
   .choice:has(input:checked) .c-sub{color:var(--gold-soft);}
 
+  .other-field{
+    display:flex; flex-direction:column; gap:10px;
+    padding:20px 22px;
+    background:rgba(184,151,46,.05);
+    border-left:2px solid var(--gold);
+    animation:otherIn .45s var(--ease);
+  }
+  .other-label{
+    font-family:var(--mono);
+    font-size:10.5px;
+    font-weight:500;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--gold-soft);
+  }
+  .other-field .input{padding:8px 0 10px; font-size:16px;}
+  @keyframes otherIn{
+    from{opacity:0; transform:translateY(-6px);}
+    to{opacity:1; transform:none;}
+  }
+
   .video{
     border:1px dashed var(--line-2);
     padding:26px;
@@ -925,7 +946,7 @@
           <span class="tag">The Floor</span>
         </div>
         <h3>Miami. B2B. <span class="accent">All execution.</span></h3>
-        <p>A sales collective based in South Florida. Pipeline in one hand, phone in the other. We show up for companies that need results, not another pitch deck.</p>
+        <p>A sales collective based in South Florida. We show up for companies that need results, not another pitch deck, and we run the full playbook from prospect to close.</p>
         <div class="tenet-foot">
           <span class="fmeta">25.76° N</span>
           <span class="fline"></span>
@@ -941,7 +962,7 @@
           <span class="tag">The Work</span>
         </div>
         <h3>We let <span class="accent">the close do the talking.</span></h3>
-        <p>Less theory, more dialing. The team stays busy because the work is real, and we keep our focus on what actually moves revenue.</p>
+        <p>Less theory, more reps. The team stays busy because the work is real, and we keep our focus on what actually moves revenue.</p>
         <div class="tenet-foot">
           <span class="fmeta">Action</span>
           <span class="fline"></span>
@@ -1007,7 +1028,11 @@
           <label class="choice"><input type="radio" name="industry" value="Tech / SaaS"><span class="c-title">Tech / SaaS</span><span class="c-sub">Software and platforms</span></label>
           <label class="choice"><input type="radio" name="industry" value="Finance"><span class="c-title">Finance</span><span class="c-sub">Banking and insurance</span></label>
           <label class="choice"><input type="radio" name="industry" value="Real Estate"><span class="c-title">Real Estate</span><span class="c-sub">Property and development</span></label>
-          <label class="choice"><input type="radio" name="industry" value="Other"><span class="c-title">Other</span><span class="c-sub">Different vertical</span></label>
+          <label class="choice"><input type="radio" name="industry" value="Other" data-other="industry-other"><span class="c-title">Other</span><span class="c-sub">Different vertical</span></label>
+        </div>
+        <div class="other-field" id="industry-other" hidden>
+          <label class="other-label">Please specify</label>
+          <input type="text" name="industry_other" class="input" placeholder="Tell us which industry">
         </div>
       </div>
 
@@ -1195,6 +1220,28 @@
 
   form.addEventListener('input', updateProgress);
   form.addEventListener('change', updateProgress);
+
+  // Conditional "Other" fields
+  document.querySelectorAll('input[type="radio"]').forEach(radio=>{
+    radio.addEventListener('change', ()=>{
+      const groupName = radio.name;
+      document.querySelectorAll(`input[name="${groupName}"]`).forEach(r=>{
+        const targetId = r.dataset.other;
+        if(targetId){
+          const panel = document.getElementById(targetId);
+          if(panel){
+            if(r.checked){
+              panel.hidden = false;
+            } else {
+              panel.hidden = true;
+              const otherInput = panel.querySelector('input');
+              if(otherInput) otherInput.value = '';
+            }
+          }
+        }
+      });
+    });
+  });
 
   // Show sticky progress bar only when apply section is in view
   const applySection = document.getElementById('apply');

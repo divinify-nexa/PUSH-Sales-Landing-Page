@@ -4,7 +4,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PUSH Sales Collective · Miami</title>
-<meta name="description" content="PUSH Sales Collective. A Miami-based B2B sales floor built for closers. Persist until something happens." />
+<meta name="description" content="PUSH Sales Collective. A Miami-based B2B sales team built for closers. Persist until something happens." />
+<link rel="icon" type="image/png" href="Assets/push-logo.png">
+<link rel="apple-touch-icon" href="Assets/push-logo.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="PUSH Sales Collective">
+<meta property="og:description" content="A Miami-based B2B sales team built for closers. Persist until something happens.">
+<meta property="og:image" content="Assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PUSH Sales Collective">
+<meta name="twitter:description" content="A Miami-based B2B sales team built for closers. Persist until something happens.">
+<meta name="twitter:image" content="Assets/og-image.jpg">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -335,6 +347,28 @@
   }
   .cta:hover::before{transform:translateY(0);}
   .cta:hover .arrow{transform:rotate(-90deg) translateX(-2px);}
+
+  @media (max-width:720px){
+    .hero-inner{padding:120px 22px 70px; gap:32px;}
+    .eyebrow{
+      font-size:9.5px;
+      letter-spacing:.24em;
+      gap:10px;
+      flex-wrap:nowrap;
+      white-space:nowrap;
+      justify-content:center;
+      text-align:center;
+    }
+    .eyebrow::before, .eyebrow::after{width:18px; flex-shrink:0;}
+    .cta{
+      padding:14px 24px;
+      font-size:11px;
+      letter-spacing:.18em;
+      gap:12px;
+      white-space:nowrap;
+    }
+    .cta .arrow{width:18px; height:18px;}
+  }
 
   @keyframes fadeUp{
     from{opacity:0;transform:translateY(20px);}
@@ -1272,7 +1306,7 @@
   </div>
   <div class="wrap">
     <div class="apply-intro">
-      <span class="apply-index reveal">Chapter 01 · The Interview</span>
+      <span class="apply-index reveal">The Interview</span>
       <h2 class="apply-title reveal d1">Nine questions. <span class="accent">That's it.</span></h2>
       <p class="apply-sub reveal d2">Answer the way you'd pitch. Short, clear, and honest.</p>
     </div>

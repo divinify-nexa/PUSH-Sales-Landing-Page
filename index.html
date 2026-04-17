@@ -158,7 +158,7 @@
   }
   @media (max-width:720px){
     .hero-img{
-      background-position:100% 55%;
+      background-position:62% 55%;
       animation:heroZoomMobile 22s ease-out forwards;
     }
     @keyframes heroZoomMobile{from{transform:scale(1.12);} to{transform:scale(1.02);}}
@@ -365,13 +365,17 @@
 
   @media (max-width:720px){
     .hero-inner{padding:120px 22px 90px; gap:30px;}
-    .hero-mark img{height:120px;}
-    .hero-mark .mark-rule{width:52px;}
+    .hero-mark{display:none;}
     .acronym-vertical{max-width:260px; gap:10px;}
     .acr-row{gap:20px; padding:14px 0; grid-template-columns:auto auto 1fr;}
     .acr-letter{text-align:center; width:1em;}
     .acr-divider{height:46px;}
-    .acr-cue{width:14px;}
+    .acr-cue{
+      width:14px;
+      top:0;
+      transform:none;
+      height:54%;
+    }
     .acr-cue.left{right:calc(100% + 10px);}
     .acr-cue.right{left:calc(100% + 10px);}
     .acr-cue .chev{font-size:24px;}

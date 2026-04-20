@@ -1055,10 +1055,41 @@
     gap:22px;
   }
 
-  /* HERO CTA */
+  /* HERO CTA — filled, prominent */
   .hero-cta{
     opacity:0;
-    animation:fadeUp 1s 3.3s var(--ease) forwards;
+    animation:ctaIn 1s 3.3s var(--ease) forwards;
+    padding:22px 44px;
+    font-size:12.5px;
+    letter-spacing:.32em;
+    gap:20px;
+    background:linear-gradient(135deg, var(--gold-soft) 0%, var(--gold) 100%);
+    border-color:var(--gold);
+    color:#0a0a0a;
+    box-shadow:
+      0 14px 44px rgba(184,151,46,.32),
+      0 0 0 1px rgba(184,151,46,.25),
+      inset 0 1px 0 rgba(255,255,255,.25);
+  }
+  .hero-cta::before{
+    background:#0a0a0a;
+    transform:translateX(101%);
+  }
+  .hero-cta:hover::before{transform:translateX(0);}
+  .hero-cta:hover{
+    color:var(--off);
+    border-color:var(--gold);
+    transform:translateY(-3px);
+    box-shadow:
+      0 22px 60px rgba(184,151,46,.5),
+      0 0 0 1px rgba(184,151,46,.4);
+  }
+  @keyframes ctaIn{
+    from{opacity:0; transform:translateY(16px);}
+    to{opacity:1; transform:none;}
+  }
+  @media (max-width:720px){
+    .hero-cta{padding:18px 30px; font-size:11px; letter-spacing:.28em; gap:16px;}
   }
 
   /* CONTACT SECTION */
@@ -1307,9 +1338,9 @@
 
       <div class="stand-cell reveal d3">
         <svg class="sc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M12 2 L15 9 L22 9 L16 14 L18 22 L12 17 L6 22 L8 14 L2 9 L9 9 Z"/></svg>
-        <span class="sc-label">Tolerance</span>
-        <span class="sc-num">0<span class="unit">Shortcuts</span></span>
-        <span class="sc-sub">Zero shortcuts tolerated. One bar — every rep, every conversation, every day.</span>
+        <span class="sc-label">Cadence</span>
+        <span class="sc-num">24<span class="unit">/7</span></span>
+        <span class="sc-sub">The work doesn't wait for motivation. Same bar, every rep, every day of the week.</span>
       </div>
     </div>
   </div>
@@ -1429,7 +1460,7 @@
     <div class="contact-inner">
       <span class="contact-eyebrow reveal">Get In Touch</span>
       <h2 class="reveal d1">Let's build <span class="accent">something real.</span></h2>
-      <p class="reveal d2">Partner with a team that treats your outcome like their own. Whether you're scaling a product or sharpening a sales org — start the conversation.</p>
+      <p class="reveal d2">Partner with a team that treats your outcome like their own. Whether you're scaling a product or looking to sharpen your sales skills, let's start the conversation.</p>
       <div class="contact-ctas reveal d3">
         <a class="cta-btn lg" href="mailto:info@pushsalescollective.com">
           <span>Start The Conversation</span>

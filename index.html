@@ -278,7 +278,7 @@
     color:var(--off);
     letter-spacing:-.06em;
     text-align:right;
-    clip-path:inset(0 0 100% 0);
+    clip-path:inset(-15% -15% 100% -15%);
     opacity:0;
     transition:color .5s ease;
   }
@@ -286,9 +286,9 @@
     animation:letterUnveil 1.15s var(--ease) forwards;
   }
   @keyframes letterUnveil{
-    0%{clip-path:inset(0 0 100% 0); opacity:0;}
+    0%{clip-path:inset(-15% -15% 100% -15%); opacity:0;}
     30%{opacity:1;}
-    100%{clip-path:inset(0 0 0% 0); opacity:1;}
+    100%{clip-path:inset(-15% -15% -15% -15%); opacity:1;}
   }
 
   .acr-divider{
@@ -974,28 +974,30 @@
     text-align:center;
   }
   .foot-logo img{
-    height:48px; width:auto;
+    height:88px; width:auto;
     filter:invert(1) brightness(1.1);
-    opacity:.85;
+    opacity:.9;
   }
-  .foot-line{
+  @media (max-width:720px){
+    .foot-logo img{height:72px;}
+  }
+  .foot-maps{
+    display:flex; align-items:center; gap:14px;
     font-family:var(--mono);
     font-size:11px;
-    font-weight:400;
+    font-weight:500;
     letter-spacing:.28em;
     text-transform:uppercase;
     color:var(--plat-2);
   }
-  .foot-meta{
-    display:flex; align-items:center; gap:14px;
-    font-family:var(--mono);
-    font-size:10px;
-    font-weight:500;
-    letter-spacing:.3em;
-    text-transform:uppercase;
+  .foot-maps a{
     color:var(--plat-2);
+    transition:color .25s ease, border-color .25s ease;
+    border-bottom:1px solid var(--line-2);
+    padding-bottom:2px;
   }
-  .foot-meta .dot{width:4px; height:4px; border-radius:50%; background:var(--gold);}
+  .foot-maps a:hover{color:var(--gold-soft); border-bottom-color:var(--gold);}
+  .foot-maps .dot{width:4px; height:4px; border-radius:50%; background:var(--gold);}
   .foot-socials{display:flex; gap:10px;}
   .li{
     display:inline-flex; align-items:center; justify-content:center;
@@ -1349,20 +1351,20 @@
   <div class="wrap">
     <div class="contact-inner">
       <span class="contact-eyebrow reveal">Contact Us</span>
-      <h2 class="reveal d1">Let's <span class="accent">work together.</span></h2>
-      <p class="reveal d2">Partner with a team that treats your outcome like their own. Whether you're scaling a product or looking to sharpen your sales skills, let's start the conversation.</p>
+      <h2 class="reveal d1">Let's <span class="accent">talk.</span></h2>
+      <p class="reveal d2">Whether you're scaling a brand or looking for a winning team, PUSH isn't just an acronym. It's in our DNA. We Persist Until Something Happens. Reach out and let's see if it's a fit.</p>
       <div class="contact-ctas reveal d3">
         <a class="cta-btn lg" href="mailto:info@pushsalescollective.com">
-          <span>Start The Conversation</span>
+          <span>Contact Us</span>
           <span class="arrow" aria-hidden="true"></span>
         </a>
       </div>
       <div class="contact-meta reveal d4">
-        <span>Miami, FL</span>
+        <span>Standards</span>
         <span class="dot"></span>
-        <span>Direct Sales</span>
+        <span>Persistence</span>
         <span class="dot"></span>
-        <span>By Appointment</span>
+        <span>Growth</span>
       </div>
     </div>
   </div>
@@ -1373,13 +1375,10 @@
   <div class="wrap">
     <div class="foot-inner">
       <div class="foot-logo"><img src="Assets/push-logo.png" alt="PUSH Sales Collective"></div>
-      <div class="foot-line">800 Waterford Way, Suite 450, Miami, FL 33126</div>
-      <div class="foot-meta">
-        <span>Direct Sales</span>
+      <div class="foot-maps">
+        <a href="https://www.google.com/maps/search/?api=1&amp;query=800+Waterford+Way+Suite+450+Miami+FL+33126" target="_blank" rel="noopener noreferrer">Google Maps</a>
         <span class="dot"></span>
-        <span>Mentorship</span>
-        <span class="dot"></span>
-        <span>Excellence</span>
+        <a href="https://maps.apple.com/?q=800+Waterford+Way+Suite+450+Miami+FL+33126" target="_blank" rel="noopener noreferrer">Apple Maps</a>
       </div>
       <div class="foot-socials">
         <a class="li" href="https://www.instagram.com/pushsales.co?igsh=czB2aHIweTdzdzB1" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
@@ -1443,13 +1442,20 @@
     document.querySelectorAll('#acronym .acr-row').forEach(r=>r.classList.add('in'));
   });
 
-  // Parallax on hero image
+  // Parallax on hero image — use `translate` property so it composes with
+  // the ongoing CSS scale animation instead of overriding `transform`.
   const heroImg = document.querySelector('.hero-img');
+  let heroTicking = false;
   document.addEventListener('scroll', ()=>{
-    const y = window.scrollY;
-    if(y < window.innerHeight){
-      heroImg.style.transform = `scale(1) translateY(${y * 0.25}px)`;
-    }
+    if(heroTicking) return;
+    heroTicking = true;
+    requestAnimationFrame(()=>{
+      const y = window.scrollY;
+      if(y < window.innerHeight){
+        heroImg.style.translate = `0 ${y * 0.25}px`;
+      }
+      heroTicking = false;
+    });
   }, {passive:true});
 </script>
 </body>

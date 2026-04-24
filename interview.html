@@ -206,7 +206,7 @@
     transition:width .4s var(--ease), background .4s var(--ease);
   }
   .prog-stage.done::before,
-  .prog-stage.active::before{
+  .prog-stage.current::before{
     width:24px;
     background:var(--gold);
   }
@@ -230,9 +230,10 @@
     overflow:hidden;
     text-overflow:ellipsis;
   }
-  .prog-stage.active{color:var(--gold-soft);}
   .prog-stage.done{color:var(--plat);}
   .prog-stage.done .num{opacity:.5;}
+  .prog-stage.current{color:var(--gold-soft);}
+  .prog-stage.current .num{opacity:.85;}
 
   /* Mobile compaction — keep it thin and out of the way */
   @media (max-width:600px){
@@ -1638,13 +1639,31 @@
     progPct.textContent = pct === 100 ? 'Complete' : pct + '%';
 
     progStages.forEach((s, i) => {
-      s.classList.remove('active','done');
-      if (completed[i]) s.classList.add('done');
-      else if (i === 0 || completed[i-1]) s.classList.add('active');
+      s.classList.toggle('done', completed[i]);
     });
   }
 
+  // Scroll-based "current" highlight on the stage labels
+  function updateCurrentStep(){
+    const threshold = window.innerHeight * 0.35;
+    let currentIndex = -1;
+    for (let i = 0; i < steps.length; i++){
+      if (steps[i].getBoundingClientRect().top <= threshold) currentIndex = i;
+    }
+    progStages.forEach((s, i) => {
+      s.classList.toggle('current', i === currentIndex);
+    });
+  }
+  let stepTicking = false;
+  document.addEventListener('scroll', () => {
+    if (stepTicking) return;
+    stepTicking = true;
+    requestAnimationFrame(() => { updateCurrentStep(); stepTicking = false; });
+  }, { passive: true });
+  window.addEventListener('resize', updateCurrentStep);
+
   updateProgress();
+  updateCurrentStep();
 
   // SUBMIT
   form.addEventListener('submit', e => {

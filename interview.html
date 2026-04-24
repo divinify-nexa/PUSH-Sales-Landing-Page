@@ -511,22 +511,34 @@
   }
 
   /* VIDEO UPLOAD */
+  .video-field{
+    position:relative;
+    padding-left:22px;
+    border-left:2px solid var(--gold);
+  }
+  .video-field + .video-field{
+    margin-top:48px;
+  }
+  @media (min-width:720px){
+    .video-field{padding-left:26px;}
+    .video-field + .video-field{margin-top:60px;}
+  }
   .video{
-    border:1px dashed var(--line-2);
-    padding:20px;
-    background:var(--panel-2);
-    transition:border-color .25s ease;
+    border:none;
+    background:transparent;
+    padding:0;
+    margin-top:8px;
   }
   .video.ready{
-    border-style:solid;
-    border-color:var(--gold);
-    background:rgba(184,151,46,.04);
+    border:none;
+    background:transparent;
+    padding:0;
   }
   .video-file{
     display:none;
   }
   .video-empty{
-    display:flex; flex-direction:column; gap:14px;
+    display:flex; flex-direction:column; gap:12px;
   }
   .video.ready .video-empty{display:none;}
   .video-selected{
@@ -1086,7 +1098,7 @@
       <h2 class="step-title">Speak for yourself.</h2>
       <p class="step-intro">This is part of your first impression. Record each response clearly in a professional setting. 60–90 seconds per answer is ideal.</p>
 
-      <div class="field">
+      <div class="field video-field">
         <span class="field-label">Video 01</span>
         <h3 class="q-text">What made you apply, and what are you looking for in your next opportunity?<span class="req">*</span></h3>
         <p class="field-help">Be real. Tell us what caught your attention and what matters most to you right now.</p>
@@ -1111,7 +1123,7 @@
         <div class="field-error">Please record or upload a video response.</div>
       </div>
 
-      <div class="field">
+      <div class="field video-field">
         <span class="field-label">Video 02</span>
         <h3 class="q-text">When things get hard, what keeps you going — and why should we bet on you?<span class="req">*</span></h3>
         <p class="field-help">This is your chance to show us your mindset, standards, and edge.</p>

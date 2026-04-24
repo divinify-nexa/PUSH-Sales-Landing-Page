@@ -126,60 +126,102 @@
     .nav-right{font-size:11.5px; gap:28px; letter-spacing:.3em;}
   }
 
-  /* PROGRESS BAR */
-  .progress{
-    position:sticky; top:var(--nav-h); z-index:50;
-    background:rgba(11,11,11,.92);
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
-    border-bottom:1px solid var(--line);
-  }
-  .progress-inner{
-    max-width:var(--maxw);
-    margin:0 auto;
-    padding:14px 22px 12px;
-  }
-  @media (min-width:720px){
-    .progress-inner{padding:16px 36px 14px;}
-  }
-  .prog-meta{
-    display:flex; justify-content:space-between; align-items:center;
-    font-family:var(--mono);
-    font-size:10px;
-    font-weight:500;
-    letter-spacing:.28em;
-    text-transform:uppercase;
-    color:var(--plat-2);
-    margin-bottom:8px;
-  }
-  .prog-meta .pct{color:var(--gold-soft);}
-  .prog-track{
-    position:relative;
+  /* PROGRESS — slim bar on mobile, vertical rail on desktop */
+  .prog-bar{
+    position:fixed;
+    top:var(--nav-h); left:0; right:0;
     height:3px;
     background:var(--line);
     overflow:hidden;
+    z-index:60;
+    pointer-events:none;
   }
-  .prog-fill{
-    position:absolute; inset:0 auto 0 0;
-    width:0%;
+  .prog-bar::after{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0;
+    width:var(--prog, 0%);
     background:linear-gradient(90deg, var(--gold) 0%, var(--gold-soft) 100%);
     transition:width .5s var(--ease);
   }
-  .prog-stages{
-    display:flex; justify-content:space-between;
-    margin-top:10px;
-    font-family:var(--mono);
-    font-size:9px;
-    font-weight:500;
-    letter-spacing:.22em;
-    text-transform:uppercase;
-    color:var(--mute);
+  .prog-rail{
+    display:none;
   }
-  .prog-stages span.active{color:var(--gold-soft);}
-  .prog-stages span.done{color:var(--plat);}
-  @media (min-width:720px){
-    .prog-meta{font-size:11px;}
-    .prog-stages{font-size:10px;}
+  @media (min-width:1100px){
+    .prog-bar{display:none;}
+    .prog-rail{
+      display:flex; flex-direction:column;
+      position:fixed;
+      top:50%;
+      right:24px;
+      transform:translateY(-50%);
+      z-index:60;
+      padding:18px 18px 14px;
+      background:rgba(11,11,11,.7);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      border:1px solid var(--line);
+      min-width:170px;
+    }
+    .prog-rail .rail-head{
+      font-family:var(--mono);
+      font-size:9.5px;
+      font-weight:500;
+      letter-spacing:.28em;
+      text-transform:uppercase;
+      color:var(--plat-2);
+      margin-bottom:14px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .prog-rail .rail-head .pct{color:var(--gold-soft);}
+    .prog-stage{
+      position:relative;
+      display:flex; align-items:center; gap:12px;
+      padding:10px 0 10px 4px;
+      color:var(--mute);
+      transition:color .35s var(--ease);
+    }
+    .prog-stage + .prog-stage::before{
+      content:"";
+      position:absolute;
+      left:7.5px; top:-10px; bottom:calc(50% + 6px);
+      width:1px;
+      background:var(--line);
+    }
+    .prog-stage::after{
+      content:"";
+      position:absolute;
+      left:7.5px; top:calc(50% + 6px); bottom:-10px;
+      width:1px;
+      background:var(--line);
+    }
+    .prog-stage:last-child::after{display:none;}
+    .prog-stage .ind{
+      width:9px; height:9px;
+      border-radius:50%;
+      background:transparent;
+      border:1px solid var(--line-2);
+      flex-shrink:0;
+      position:relative; z-index:1;
+      transition:border-color .35s var(--ease), background .35s var(--ease), box-shadow .35s var(--ease);
+    }
+    .prog-stage .nm{
+      font-family:var(--mono);
+      font-size:10.5px;
+      font-weight:500;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+    }
+    .prog-stage.active{ color:var(--gold-soft); }
+    .prog-stage.active .ind{
+      border-color:var(--gold);
+      background:var(--gold);
+      box-shadow:0 0 14px rgba(184,151,46,.7);
+    }
+    .prog-stage.done{ color:var(--plat); }
+    .prog-stage.done .ind{
+      border-color:var(--gold);
+      background:var(--gold);
+    }
   }
 
   /* HERO */
@@ -361,12 +403,33 @@
   .input-date{
     color:var(--off);
     font-family:var(--mono);
+    font-size:18px;
+    padding:22px 22px;
     letter-spacing:.06em;
+    cursor:pointer;
+    min-height:64px;
   }
   .input-date::-webkit-calendar-picker-indicator{
-    filter:invert(1) brightness(.9);
-    opacity:.7;
+    filter:invert(1) brightness(1);
+    opacity:.85;
     cursor:pointer;
+    width:26px;
+    height:26px;
+    margin-left:10px;
+    transition:opacity .25s ease;
+  }
+  .input-date::-webkit-calendar-picker-indicator:hover{opacity:1;}
+  .input-date::-webkit-datetime-edit{padding:2px 0;}
+  @media (min-width:720px){
+    .input-date{
+      font-size:20px;
+      padding:26px 24px;
+      min-height:72px;
+    }
+    .input-date::-webkit-calendar-picker-indicator{
+      width:30px;
+      height:30px;
+    }
   }
   .field-error{
     display:none;
@@ -901,22 +964,18 @@
   </div>
 </nav>
 
-<!-- PROGRESS BAR -->
-<div class="progress" id="progress">
-  <div class="progress-inner">
-    <div class="prog-meta">
-      <span>Application Progress</span>
-      <span class="pct" id="progPct">0%</span>
-    </div>
-    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
-    <div class="prog-stages" id="progStages">
-      <span data-stage="1">01 · About</span>
-      <span data-stage="2">02 · Drive</span>
-      <span data-stage="3">03 · Video</span>
-      <span data-stage="4">04 · Logistics</span>
-    </div>
+<!-- PROGRESS -->
+<div class="prog-bar" id="progBar" aria-hidden="true"></div>
+<aside class="prog-rail" id="progRail" aria-label="Application progress">
+  <div class="rail-head">
+    <span>Progress</span>
+    <span class="pct" id="progPct">0%</span>
   </div>
-</div>
+  <div class="prog-stage" data-stage="1"><span class="ind"></span><span class="nm">01 · About</span></div>
+  <div class="prog-stage" data-stage="2"><span class="ind"></span><span class="nm">02 · Drive</span></div>
+  <div class="prog-stage" data-stage="3"><span class="ind"></span><span class="nm">03 · Video</span></div>
+  <div class="prog-stage" data-stage="4"><span class="ind"></span><span class="nm">04 · Logistics</span></div>
+</aside>
 
 <form id="interview" novalidate>
 
@@ -1186,9 +1245,10 @@
 
   const form = document.getElementById('interview');
   const steps = Array.from(document.querySelectorAll('section.step'));
-  const progFill = document.getElementById('progFill');
+  const progBar = document.getElementById('progBar');
+  const progRail = document.getElementById('progRail');
   const progPct = document.getElementById('progPct');
-  const progStages = document.getElementById('progStages');
+  const railStages = progRail.querySelectorAll('.prog-stage');
   const submitBtn = document.getElementById('submitBtn');
   const submitErr = document.getElementById('submitErr');
   const confirmEl = document.getElementById('confirm');
@@ -1526,11 +1586,10 @@
     const completed = steps.map(isStepComplete);
     const doneCount = completed.filter(Boolean).length;
     const pct = Math.round((doneCount / steps.length) * 100);
-    progFill.style.width = pct + '%';
+    progBar.style.setProperty('--prog', pct + '%');
     progPct.textContent = pct === 100 ? 'Complete' : pct + '%';
 
-    const stageEls = progStages.querySelectorAll('span[data-stage]');
-    stageEls.forEach((s, i) => {
+    railStages.forEach((s, i) => {
       s.classList.remove('active','done');
       if (completed[i]) s.classList.add('done');
       else if (i === 0 || completed[i-1]) s.classList.add('active');
@@ -1582,7 +1641,8 @@
     console.log('Interview submitted', summary);
 
     form.classList.add('hidden');
-    document.getElementById('progress').classList.add('hidden');
+    progBar.classList.add('hidden');
+    progRail.classList.add('hidden');
     confirmEl.classList.add('show');
     window.scrollTo({ top:0, behavior:'smooth' });
   });

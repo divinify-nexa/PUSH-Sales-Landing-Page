@@ -126,113 +126,116 @@
     .nav-right{font-size:11.5px; gap:28px; letter-spacing:.3em;}
   }
 
-  /* PROGRESS — slim bar on mobile, vertical rail on desktop */
-  .prog-bar{
-    position:fixed;
-    top:var(--nav-h); left:0; right:0;
-    height:3px;
+  /* PROGRESS — sits between hero and form, sticks under nav on scroll */
+  .progress{
+    position:sticky;
+    top:var(--nav-h);
+    z-index:55;
+    background:rgba(11,11,11,.92);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  .progress-inner{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:18px 22px 16px;
+  }
+  @media (min-width:720px){
+    .progress-inner{padding:20px 36px 18px;}
+  }
+  .prog-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .prog-head .label{
+    font-family:var(--mono);
+    font-size:10px;
+    font-weight:500;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--plat-2);
+  }
+  .prog-head .pct{
+    font-family:var(--mono);
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:.18em;
+    color:var(--gold-soft);
+  }
+  .prog-track{
+    position:relative;
+    height:2px;
     background:var(--line);
     overflow:hidden;
-    z-index:60;
-    pointer-events:none;
   }
-  .prog-bar::after{
-    content:"";
+  .prog-fill{
     position:absolute; left:0; top:0; bottom:0;
     width:var(--prog, 0%);
-    background:linear-gradient(90deg, var(--gold) 0%, var(--gold-soft) 100%);
-    transition:width .5s var(--ease);
+    background:linear-gradient(90deg, var(--gold-soft) 0%, var(--gold) 100%);
+    transition:width .55s var(--ease);
+    box-shadow:0 0 12px rgba(184,151,46,.5);
   }
-  .prog-rail{
-    display:none;
+  .prog-stages{
+    display:flex; justify-content:space-between;
+    margin-top:14px;
+    gap:8px;
   }
-  @media (min-width:1100px){
-    .prog-bar{display:none;}
-    .prog-rail{
-      display:block;
-      position:fixed;
-      top:50%;
-      right:44px;
-      transform:translateY(-50%);
-      z-index:60;
-      width:280px;
-    }
-    .rail-head{
-      display:flex; align-items:baseline; justify-content:space-between;
-      margin-bottom:34px;
-      padding-bottom:14px;
-      border-bottom:1px solid var(--line-2);
-    }
-    .rail-head .label{
-      font-family:var(--mono);
-      font-size:10px;
-      font-weight:500;
-      letter-spacing:.36em;
-      text-transform:uppercase;
-      color:var(--plat-2);
-    }
-    .rail-head .pct{
-      font-family:var(--mono);
-      font-size:13px;
-      font-weight:500;
-      letter-spacing:.18em;
-      color:var(--gold-soft);
-    }
-    .rail-stages{
-      position:relative;
-      padding-left:24px;
-    }
-    .rail-track{
-      position:absolute;
-      top:8px; bottom:8px;
-      left:0; width:1px;
-      background:var(--line);
-    }
-    .rail-fill{
-      position:absolute;
-      top:8px; left:0; width:1px;
-      height:var(--prog, 0%);
-      background:linear-gradient(180deg, var(--gold-soft) 0%, var(--gold) 100%);
-      transition:height .6s var(--ease);
-      box-shadow:0 0 14px rgba(184,151,46,.5);
-    }
-    .prog-stage{
-      position:relative;
-      display:flex; flex-direction:column; gap:6px;
-      padding:0 0 30px 0;
-      color:var(--mute);
-      transition:color .4s var(--ease);
-    }
-    .prog-stage:last-child{padding-bottom:0;}
-    .prog-stage::before{
-      content:"";
-      position:absolute;
-      left:-25px; top:11px;
-      width:0; height:1px;
-      background:var(--gold);
-      transition:width .4s var(--ease);
-    }
-    .prog-stage .num{
-      font-family:var(--mono);
-      font-size:10px;
-      font-weight:500;
-      letter-spacing:.32em;
-      text-transform:uppercase;
-      color:inherit;
-      opacity:.7;
-    }
-    .prog-stage .nm{
-      font-family:var(--sans);
-      font-weight:500;
-      font-size:18px;
-      line-height:1.2;
-      letter-spacing:-.01em;
-      color:inherit;
-    }
-    .prog-stage.active{color:var(--gold-soft);}
-    .prog-stage.active::before{width:20px;}
-    .prog-stage.done{color:var(--plat);}
-    .prog-stage.done .num{opacity:.45;}
+  .prog-stage{
+    position:relative;
+    flex:1; min-width:0;
+    display:flex; flex-direction:column; gap:3px;
+    color:var(--mute);
+    transition:color .4s var(--ease);
+  }
+  .prog-stage::before{
+    content:"";
+    position:absolute;
+    left:0; top:-15px;
+    width:0; height:1px;
+    background:var(--gold);
+    transition:width .4s var(--ease), background .4s var(--ease);
+  }
+  .prog-stage.done::before,
+  .prog-stage.active::before{
+    width:24px;
+    background:var(--gold);
+  }
+  .prog-stage .num{
+    font-family:var(--mono);
+    font-size:9.5px;
+    font-weight:500;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:inherit;
+    opacity:.75;
+  }
+  .prog-stage .nm{
+    font-family:var(--sans);
+    font-weight:500;
+    font-size:13px;
+    line-height:1.2;
+    letter-spacing:-.005em;
+    color:inherit;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .prog-stage.active{color:var(--gold-soft);}
+  .prog-stage.done{color:var(--plat);}
+  .prog-stage.done .num{opacity:.5;}
+
+  /* Mobile compaction — keep it thin and out of the way */
+  @media (max-width:600px){
+    .prog-stages{gap:4px;}
+    .prog-stage .nm{display:none;}
+    .prog-stage .num{font-size:9px; letter-spacing:.22em;}
+    .prog-head{margin-bottom:10px;}
+    .progress-inner{padding:14px 22px 12px;}
+  }
+  @media (min-width:900px){
+    .prog-stage .nm{font-size:14px;}
   }
 
   /* HERO */
@@ -975,35 +978,6 @@
   </div>
 </nav>
 
-<!-- PROGRESS -->
-<div class="prog-bar" id="progBar" aria-hidden="true"></div>
-<aside class="prog-rail" id="progRail" aria-label="Application progress">
-  <div class="rail-head">
-    <span class="label">Progress</span>
-    <span class="pct" id="progPct">0%</span>
-  </div>
-  <div class="rail-stages">
-    <span class="rail-track" aria-hidden="true"></span>
-    <span class="rail-fill" aria-hidden="true"></span>
-    <div class="prog-stage" data-stage="1">
-      <span class="num">01 / About</span>
-      <span class="nm">Who you are</span>
-    </div>
-    <div class="prog-stage" data-stage="2">
-      <span class="num">02 / Drive</span>
-      <span class="nm">Prove your push</span>
-    </div>
-    <div class="prog-stage" data-stage="3">
-      <span class="num">03 / Video</span>
-      <span class="nm">Speak for yourself</span>
-    </div>
-    <div class="prog-stage" data-stage="4">
-      <span class="num">04 / Logistics</span>
-      <span class="nm">A few details</span>
-    </div>
-  </div>
-</aside>
-
 <form id="interview" novalidate>
 
   <!-- HERO -->
@@ -1019,6 +993,23 @@
       </div>
     </div>
   </section>
+
+  <!-- PROGRESS — sticks under nav as user scrolls -->
+  <div class="progress" id="progress" aria-label="Application progress">
+    <div class="progress-inner">
+      <div class="prog-head">
+        <span class="label">Application Progress</span>
+        <span class="pct" id="progPct">0%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" aria-hidden="true"></div></div>
+      <div class="prog-stages" id="progStages">
+        <div class="prog-stage" data-stage="1"><span class="num">01</span><span class="nm">About You</span></div>
+        <div class="prog-stage" data-stage="2"><span class="num">02</span><span class="nm">Prove Your Drive</span></div>
+        <div class="prog-stage" data-stage="3"><span class="num">03</span><span class="nm">Video Responses</span></div>
+        <div class="prog-stage" data-stage="4"><span class="num">04</span><span class="nm">Logistics</span></div>
+      </div>
+    </div>
+  </div>
 
   <!-- SECTION 01 — ABOUT YOU -->
   <section class="step" data-step="1">
@@ -1272,10 +1263,9 @@
 
   const form = document.getElementById('interview');
   const steps = Array.from(document.querySelectorAll('section.step'));
-  const progBar = document.getElementById('progBar');
-  const progRail = document.getElementById('progRail');
+  const progEl = document.getElementById('progress');
   const progPct = document.getElementById('progPct');
-  const railStages = progRail.querySelectorAll('.prog-stage');
+  const progStages = progEl.querySelectorAll('.prog-stage');
   const submitBtn = document.getElementById('submitBtn');
   const submitErr = document.getElementById('submitErr');
   const confirmEl = document.getElementById('confirm');
@@ -1616,7 +1606,7 @@
     document.documentElement.style.setProperty('--prog', pct + '%');
     progPct.textContent = pct === 100 ? 'Complete' : pct + '%';
 
-    railStages.forEach((s, i) => {
+    progStages.forEach((s, i) => {
       s.classList.remove('active','done');
       if (completed[i]) s.classList.add('done');
       else if (i === 0 || completed[i-1]) s.classList.add('active');
@@ -1668,8 +1658,7 @@
     console.log('Interview submitted', summary);
 
     form.classList.add('hidden');
-    progBar.classList.add('hidden');
-    progRail.classList.add('hidden');
+    progEl.classList.add('hidden');
     confirmEl.classList.add('show');
     window.scrollTo({ top:0, behavior:'smooth' });
   });

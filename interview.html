@@ -1883,7 +1883,7 @@
   updateCurrentStep();
 
   // SUBMIT
-  form.addEventListener('submit', e => {
+form.addEventListener('submit', async e => {
     e.preventDefault();
     submitErr.classList.remove('show');
 
@@ -1922,7 +1922,11 @@
     data.forEach((v, k) => {
       summary[k] = v instanceof File ? `${v.name} (${Math.round(v.size/1024)} KB)` : v;
     });
-    console.log('Interview submitted', summary);
+    await fetch('https://n8n-production-f881.up.railway.app/webhook/bf3f4439-0d59-49ed-ad32-57fa54f75d88', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(Object.fromEntries(data))
+});
 
     form.classList.add('hidden');
     progEl.classList.add('hidden');

@@ -1909,6 +1909,7 @@
   }
 form.addEventListener('submit', async e => {
     e.preventDefault();
+  submitBtn.disabled = true;
     submitErr.classList.remove('show');
 
     let firstBad = null;
@@ -1934,6 +1935,7 @@ form.addEventListener('submit', async e => {
     if (firstBad){
       submitErr.classList.add('show');
       firstBad.scrollIntoView({ behavior:'smooth', block:'center' });
+      submitBtn.disabled = false;  // re-enable on validation error
       return;
     }
 

@@ -1893,6 +1893,20 @@
   updateCurrentStep();
 
   // SUBMIT
+  async function uploadVideoToR2(file, fieldName) {
+    const presignRes = await fetch('https://n8n-production-f881.up.railway.app/webhook/r2-presign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fieldName, contentType: file.type })
+    });
+    const { uploadUrl, publicUrl } = await presignRes.json();
+    await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type },
+      body: file
+    });
+    return publicUrl;
+  }
 form.addEventListener('submit', async e => {
     e.preventDefault();
     submitErr.classList.remove('show');
@@ -1925,18 +1939,27 @@ form.addEventListener('submit', async e => {
 
     // Success — collect data (placeholder for real endpoint wiring)
     const data = new FormData(form);
-    Object.keys(recordedBlobs).forEach(k => {
-      data.set(k, recordedBlobs[k].file);
-    });
-    const summary = {};
-    data.forEach((v, k) => {
-      summary[k] = v instanceof File ? `${v.name} (${Math.round(v.size/1024)} KB)` : v;
-    });
+    const videoApplyFile = document.getElementById('video-apply').files[0] || recordedBlobs['video-apply']?.file;
+    const videoMindsetFile = document.getElementById('video-mindset').files[0] || recordedBlobs['video-mindset']?.file;
+    const [video_apply_url, video_mindset_url] = await Promise.all([
+      videoApplyFile ? uploadVideoToR2(videoApplyFile, 'video-apply') : Promise.resolve(''),
+      videoMindsetFile ? uploadVideoToR2(videoMindsetFile, 'video-mindset') : Promise.resolve('')
+    ]);
     await fetch('https://n8n-production-f881.up.railway.app/webhook/bf3f4439-0d59-49ed-ad32-57fa54f75d88', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(Object.fromEntries(data))
-});
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: data.get('name'),
+        phone: data.get('phone'),
+        email: data.get('email'),
+        beyond: data.get('beyond'),
+        drive: data.get('drive'),
+        transport: data.get('transport'),
+        start: data.get('start'),
+        video_apply: video_apply_url,
+        video_mindset: video_mindset_url
+      })
+    });
 
     form.classList.add('hidden');
     progEl.classList.add('hidden');

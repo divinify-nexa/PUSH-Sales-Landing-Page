@@ -1279,9 +1279,8 @@
       <div class="prog-track"><div class="prog-fill" aria-hidden="true"></div></div>
       <div class="prog-stages" id="progStages">
         <div class="prog-stage" data-stage="1"><span class="num">01</span><span class="nm">About You</span></div>
-        <div class="prog-stage" data-stage="2"><span class="num">02</span><span class="nm">Prove Your Drive</span></div>
-        <div class="prog-stage" data-stage="3"><span class="num">03</span><span class="nm">Video Responses</span></div>
-        <div class="prog-stage" data-stage="4"><span class="num">04</span><span class="nm">Logistics</span></div>
+        <div class="prog-stage" data-stage="2"><span class="num">02</span><span class="nm">Video Responses</span></div>
+        <div class="prog-stage" data-stage="3"><span class="num">03</span><span class="nm">Logistics</span></div>
       </div>
     </div>
   </div>
@@ -1290,7 +1289,6 @@
   <section class="step" data-step="1">
     <div class="wrap">
       <div class="step-head">
-        <span class="step-num">01</span>
         <span class="step-rule"></span>
         <span class="step-label">About You</span>
       </div>
@@ -1313,40 +1311,13 @@
         <input type="email" id="email" name="email" class="input" placeholder="you@domain.com" autocomplete="email" inputmode="email" required>
         <div class="field-error">Please enter a valid email.</div>
       </div>
-
-      <div class="field">
-        <label class="q-text" for="beyond">Tell us who you are beyond your resume.<span class="req">*</span></label>
-        <p class="field-help">In 2–3 sentences, tell us something about yourself that a resume would never show.</p>
-        <textarea id="beyond" name="beyond" class="textarea" placeholder="Who are you outside of work?" required></textarea>
-        <div class="field-error">Please share a few sentences.</div>
-      </div>
     </div>
   </section>
 
-  <!-- SECTION 02 — PROVE YOUR DRIVE -->
+  <!-- SECTION 02 — VIDEO RESPONSES -->
   <section class="step" data-step="2">
     <div class="wrap">
       <div class="step-head">
-        <span class="step-num">02</span>
-        <span class="step-rule"></span>
-        <span class="step-label">Prove Your Drive</span>
-      </div>
-      <h2 class="step-title">Show us who you are.</h2>
-
-      <div class="field">
-        <label class="q-text" for="drive">Show us how you think, what drives you, and why you are a fit for this room.<span class="req">*</span></label>
-        <p class="field-help">Resumes only tell part of your story. PUSH is built on standards, persistence, and growth.</p>
-        <textarea id="drive" name="drive" class="textarea" placeholder="Describe a time you challenged yourself and won." required></textarea>
-        <div class="field-error">Please share an example.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SECTION 03 — VIDEO RESPONSES -->
-  <section class="step" data-step="3">
-    <div class="wrap">
-      <div class="step-head">
-        <span class="step-num">03</span>
         <span class="step-rule"></span>
         <span class="step-label">Video Responses</span>
       </div>
@@ -1380,8 +1351,8 @@
 
       <div class="field video-field">
         <span class="field-label">Video 02</span>
-        <h3 class="q-text">When things get hard, what keeps you going — and why should we bet on you?<span class="req">*</span></h3>
-        <p class="field-help">This is your chance to show us your mindset, standards, and edge.</p>
+        <h3 class="q-text">What are some of your favorite hobbies, and what do you enjoy about them?<span class="req">*</span></h3>
+        <p class="field-help">Keep it relaxed. Tell us what you love doing outside of work and what makes it fun for you.</p>
         <div class="video" data-video="mindset">
           <input type="file" class="video-file" id="video-mindset" name="video_mindset" accept="video/*" required>
           <div class="video-empty">
@@ -1405,11 +1376,10 @@
     </div>
   </section>
 
-  <!-- SECTION 04 — LOGISTICS -->
-  <section class="step last" data-step="4">
+  <!-- SECTION 03 — LOGISTICS -->
+  <section class="step last" data-step="3">
     <div class="wrap">
       <div class="step-head">
-        <span class="step-num">04</span>
         <span class="step-rule"></span>
         <span class="step-label">Logistics</span>
       </div>
@@ -1776,7 +1746,7 @@
 
   const titles = {
     'video-apply':   'What made you apply, and what are you looking for next?',
-    'video-mindset': 'When things get hard, what keeps you going?'
+    'video-mindset': 'What are your favorite hobbies, and what do you enjoy about them?'
   };
 
   let currentTarget = null;
@@ -2103,8 +2073,6 @@ form.addEventListener('submit', async e => {
         name: data.get('name'),
         phone: data.get('phone'),
         email: data.get('email'),
-        beyond: data.get('beyond'),
-        drive: data.get('drive'),
         transport: data.get('transport'),
         start: data.get('start'),
         video_apply: video_apply_url,

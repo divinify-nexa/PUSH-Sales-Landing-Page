@@ -1890,6 +1890,16 @@
 
   useBtn.addEventListener('click', () => {
     if (!recordedBlob || !currentTarget){ closeRecorder(); return; }
+    // Guard against empty/corrupt captures (the iOS fragmentation failure mode).
+    // A real 60-90s clip is several MB; anything under ~50KB means the recording
+    // didn't capture correctly — re-prompt instead of shipping a dead file.
+    if (recordedBlob.size < 51200) {
+      retryBtn.hidden = false;
+      useBtn.hidden   = true;
+      errorEl.textContent = "That recording didn't capture correctly. Please tap Retake and try again, or close and use the Upload option.";
+      errorEl.classList.add('show');
+      return;
+    }
     const ext = recordedBlob.type.includes('mp4') ? 'mp4' : 'webm';
     const filename = `${currentTarget}-recording.${ext}`;
     const file = new File([recordedBlob], filename, { type: recordedBlob.type });
@@ -2008,12 +2018,14 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fieldName, contentType: file.type })
     });
+    if (!presignRes.ok) throw new Error('Could not get upload URL');
     const { uploadUrl, publicUrl } = await presignRes.json();
-    await fetch(uploadUrl, {
+    const putRes = await fetch(uploadUrl, {
       method: 'PUT',
       headers: { 'Content-Type': file.type },
       body: file
     });
+    if (!putRes.ok) throw new Error(`Upload failed: ${putRes.status}`);
     return publicUrl;
   }
 form.addEventListener('submit', async e => {
@@ -2048,8 +2060,8 @@ form.addEventListener('submit', async e => {
       return;
     }
 
-    // Success — collect data (placeholder for real endpoint wiring)
-    const data = new FormData(form);
+    // Upload videos then POST to n8n — wrapped so any failure is visible
+    try {
     const videoApplyFile = document.getElementById('video-apply').files[0] || recordedBlobs['video-apply']?.file;
     const videoMindsetFile = document.getElementById('video-mindset').files[0] || recordedBlobs['video-mindset']?.file;
     const [video_apply_url, video_mindset_url] = await Promise.all([
@@ -2103,6 +2115,11 @@ form.addEventListener('submit', async e => {
     progEl.classList.add('hidden');
     confirmEl.classList.add('show');
     window.scrollTo({ top:0, behavior:'smooth' });
+    } catch(err) {
+      submitBtn.disabled = false;
+      submitErr.textContent = 'Something went wrong uploading your videos. Please check your connection and try again.';
+      submitErr.classList.add('show');
+    }
   });
 </script>
 </body>

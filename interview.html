@@ -2071,6 +2071,7 @@ form.addEventListener('submit', async e => {
 
     // Upload videos then POST to n8n — wrapped so any failure is visible
     try {
+    const data = new FormData(form);
     const videoApplyFile = document.getElementById('video-apply').files[0] || recordedBlobs['video-apply']?.file;
     const videoMindsetFile = document.getElementById('video-mindset').files[0] || recordedBlobs['video-mindset']?.file;
     const [video_apply_url, video_mindset_url] = await Promise.all([

@@ -145,13 +145,21 @@
     saveProgress();
   };
 
-  // Immediate, debounce-free patch that survives tab close — used for error
-  // capture and submit success so nothing is lost if the page unloads.
+  // Immediate, debounce-free patch that survives tab close. Only real table
+  // columns may go at the top level of the PATCH body; anything else is routed
+  // into form_data, otherwise PostgREST 400s the whole request on an unknown
+  // column (which is what silently dropped "submitted: true" before).
   window.__divinifyPatchNow = function(patch) {
-    Object.assign(formData, patch);
+    patch = patch || {};
+    var COLUMN_KEYS = { submitted:1, ended_at:1, submit_error:1, submit_error_at:1, submission_attempted:1 };
+    var cols = {};
+    Object.keys(patch).forEach(function(k) {
+      if (COLUMN_KEYS[k]) cols[k] = patch[k];
+      else formData[k] = patch[k];
+    });
     if (!initialized) return;
     var url = SUPABASE_URL + '/rest/v1/lead_sessions?session_id=eq.' + sessionId;
-    var body = JSON.stringify(Object.assign({}, buildPayload(), patch));
+    var body = JSON.stringify(Object.assign({}, buildPayload(), cols));
     try {
       fetch(url, {
         method: 'PATCH',

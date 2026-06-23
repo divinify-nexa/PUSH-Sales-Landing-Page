@@ -145,6 +145,27 @@
     saveProgress();
   };
 
+  // Immediate, debounce-free patch that survives tab close — used for error
+  // capture and submit success so nothing is lost if the page unloads.
+  window.__divinifyPatchNow = function(patch) {
+    Object.assign(formData, patch);
+    if (!initialized) return;
+    var url = SUPABASE_URL + '/rest/v1/lead_sessions?session_id=eq.' + sessionId;
+    var body = JSON.stringify(Object.assign({}, buildPayload(), patch));
+    try {
+      fetch(url, {
+        method: 'PATCH',
+        headers: Object.assign({}, headers, { 'Prefer': 'return=minimal' }),
+        body: body,
+        keepalive: true
+      }).catch(function() {
+        navigator.sendBeacon(url + '&apikey=' + SUPABASE_ANON_KEY, new Blob([body], { type: 'application/json' }));
+      });
+    } catch (e) {
+      try { navigator.sendBeacon(url + '&apikey=' + SUPABASE_ANON_KEY, new Blob([body], { type: 'application/json' })); } catch (e2) {}
+    }
+  };
+
   window.addEventListener('beforeunload', function() {
     var payload = JSON.stringify(Object.assign({}, buildPayload(), {
       ended_at: new Date().toISOString()
@@ -889,6 +910,69 @@
     color:var(--err);
   }
 
+  /* UPLOAD STATUS (per video) — shows the video is being secured to R2 */
+  .v-upload-status{
+    display:none;
+    flex-direction:column; gap:10px;
+    margin-top:2px;
+    padding:14px 16px;
+    border:1px solid var(--line-2);
+    background:var(--panel-2);
+  }
+  .video.ready .v-upload-status{display:flex;}
+  .v-upload-status[data-status="uploaded"]{ border-color:var(--gold); background:rgba(184,151,46,.06); }
+  .v-upload-status[data-status="failed"]{ border-color:var(--err); background:rgba(224,58,58,.06); }
+  .v-progress{
+    position:relative; height:3px; background:var(--line); overflow:hidden;
+    display:none;
+  }
+  .v-upload-status[data-status="uploading"] .v-progress{display:block;}
+  .v-progress-bar{
+    position:absolute; left:0; top:0; bottom:0; width:0%;
+    background:linear-gradient(90deg, var(--gold-soft) 0%, var(--gold) 100%);
+    transition:width .25s ease;
+    box-shadow:0 0 10px rgba(184,151,46,.5);
+  }
+  .v-status-row{ display:flex; align-items:center; gap:11px; }
+  .v-status-ico{
+    width:14px; height:14px; border-radius:50%; flex-shrink:0;
+    background:var(--mute); position:relative; box-sizing:border-box;
+  }
+  .v-upload-status[data-status="uploading"] .v-status-ico{
+    background:transparent;
+    border:2px solid var(--line-2);
+    border-top-color:var(--gold);
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .v-upload-status[data-status="uploaded"] .v-status-ico{ background:var(--gold); }
+  .v-upload-status[data-status="uploaded"] .v-status-ico::after{
+    content:""; position:absolute; left:4px; top:6px; width:5px; height:2px;
+    border-left:1.5px solid #0a0a0a; border-bottom:1.5px solid #0a0a0a; transform:rotate(-45deg);
+  }
+  .v-upload-status[data-status="failed"] .v-status-ico{ background:var(--err); }
+  .v-upload-status[data-status="failed"] .v-status-ico::after{
+    content:"!"; position:absolute; left:0; right:0; top:-1px; text-align:center;
+    font-family:var(--sans); font-size:11px; font-weight:700; color:#0a0a0a;
+  }
+  .v-status-text{
+    font-family:var(--mono); font-size:11px; font-weight:500;
+    letter-spacing:.1em; color:var(--plat); line-height:1.5;
+  }
+  .v-upload-status[data-status="failed"] .v-status-text{ color:var(--err); }
+  .v-upload-status[data-status="uploaded"] .v-status-text{ color:var(--gold-soft); }
+  .v-retry-upload{
+    display:none;
+    align-self:flex-start;
+    font-family:var(--mono); font-size:10px; font-weight:500;
+    letter-spacing:.26em; text-transform:uppercase;
+    color:var(--plat-2); background:none; border:1px solid var(--line-2);
+    padding:10px 14px; cursor:pointer;
+    transition:border-color .25s ease, color .25s ease, background .25s ease;
+  }
+  .v-retry-upload:hover{ border-color:var(--gold); color:var(--gold-soft); background:rgba(184,151,46,.06); }
+  .v-upload-status[data-status="failed"] .v-retry-upload{ display:inline-block; }
+
   /* RECORDING MODAL */
   .rec-overlay{
     position:fixed; inset:0; z-index:300;
@@ -1086,6 +1170,11 @@
       0 22px 60px rgba(184,151,46,.5),
       0 0 0 1px rgba(184,151,46,.4);
   }
+  .submit-btn:disabled{
+    cursor:default;
+    opacity:.7;
+    transform:none;
+  }
   .submit-btn .arrow{
     width:14px; height:10px;
     position:relative;
@@ -1120,15 +1209,23 @@
     padding:14px 16px;
     border:1px solid var(--err);
     background:rgba(224,58,58,.06);
-    font-family:var(--mono);
-    font-size:11px;
-    font-weight:500;
-    letter-spacing:.2em;
-    text-transform:uppercase;
+    font-family:var(--sans);
+    font-size:13.5px;
+    font-weight:400;
+    letter-spacing:0;
+    text-transform:none;
     color:var(--err);
     text-align:center;
+    line-height:1.55;
+    max-width:480px;
   }
   .submit-err.show{display:block;}
+  /* "still uploading" / informational variant — gold, not alarming red */
+  .submit-err.info{
+    border-color:var(--gold);
+    background:rgba(184,151,46,.06);
+    color:var(--gold-soft);
+  }
 
   /* CONFIRMATION */
   .confirm{
@@ -1168,6 +1265,18 @@
     max-width:440px;
     margin:0 auto;
   }
+  .confirm-note{
+    display:none;
+    margin:22px auto 0;
+    padding:14px 16px;
+    border:1px solid var(--line-2);
+    background:rgba(184,151,46,.05);
+    font-size:13.5px;
+    color:var(--plat-2);
+    line-height:1.6;
+    max-width:440px;
+  }
+  .confirm-note.show{display:block;}
   @media (min-width:720px){
     .confirm-inner{padding:56px 44px;}
   }
@@ -1322,14 +1431,14 @@
         <span class="step-label">Video Responses</span>
       </div>
       <h2 class="step-title">Speak for yourself.</h2>
-      <p class="step-intro">This is part of your first impression. Record each response clearly in a professional setting. 60–90 seconds per answer is ideal.</p>
+      <p class="step-intro">This is part of your first impression. Record each response clearly in a professional setting. 60–90 seconds per answer is ideal. Your video saves automatically as soon as you finish — you'll see a confirmation under each one.</p>
 
       <div class="field video-field">
         <span class="field-label">Video 01</span>
         <h3 class="q-text">What made you apply, and what are you looking for in your next opportunity?<span class="req">*</span></h3>
         <p class="field-help">Be real. Tell us what caught your attention and what matters most to you right now.</p>
         <div class="video" data-video="apply">
-          <input type="file" class="video-file" id="video-apply" name="video_apply" accept="video/*" required>
+          <input type="file" class="video-file" id="video-apply" name="video_apply" accept="video/*">
           <div class="video-empty">
             <div class="v-buttons">
               <button type="button" class="v-btn v-record" data-target="video-apply"><span class="ico"></span><span>Record Video</span></button>
@@ -1344,6 +1453,14 @@
               <button type="button" class="v-action retake" data-target="video-apply">Retake</button>
               <button type="button" class="v-action remove" data-target="video-apply">Remove</button>
             </div>
+            <div class="v-upload-status" data-status="idle">
+              <div class="v-progress"><div class="v-progress-bar"></div></div>
+              <div class="v-status-row">
+                <span class="v-status-ico"></span>
+                <span class="v-status-text">Preparing…</span>
+              </div>
+              <button type="button" class="v-retry-upload" data-target="video-apply">Retry upload</button>
+            </div>
           </div>
         </div>
         <div class="field-error">Please record or upload a video response.</div>
@@ -1354,7 +1471,7 @@
         <h3 class="q-text">What are some of your favorite hobbies, and what do you enjoy about them?<span class="req">*</span></h3>
         <p class="field-help">Keep it relaxed. Tell us what you love doing outside of work and what makes it fun for you.</p>
         <div class="video" data-video="mindset">
-          <input type="file" class="video-file" id="video-mindset" name="video_mindset" accept="video/*" required>
+          <input type="file" class="video-file" id="video-mindset" name="video_mindset" accept="video/*">
           <div class="video-empty">
             <div class="v-buttons">
               <button type="button" class="v-btn v-record" data-target="video-mindset"><span class="ico"></span><span>Record Video</span></button>
@@ -1368,6 +1485,14 @@
             <div class="v-actions">
               <button type="button" class="v-action retake" data-target="video-mindset">Retake</button>
               <button type="button" class="v-action remove" data-target="video-mindset">Remove</button>
+            </div>
+            <div class="v-upload-status" data-status="idle">
+              <div class="v-progress"><div class="v-progress-bar"></div></div>
+              <div class="v-status-row">
+                <span class="v-status-ico"></span>
+                <span class="v-status-text">Preparing…</span>
+              </div>
+              <button type="button" class="v-retry-upload" data-target="video-mindset">Retry upload</button>
             </div>
           </div>
         </div>
@@ -1437,7 +1562,7 @@
   <div class="submit-wrap">
     <p class="submit-copy">Our team reviews every submission carefully. If there's alignment, you'll hear from us regarding next steps.</p>
     <button type="submit" class="submit-btn" id="submitBtn">
-      Submit Application
+      <span id="submitLabel">Submit Application</span>
       <span class="arrow"></span>
     </button>
     <div class="submit-err" id="submitErr">Please complete all required fields before submitting.</div>
@@ -1452,6 +1577,7 @@
       <span class="eyebrow">Application Received</span>
       <h2>Thank you.</h2>
       <p>Your first round interview is in. Our team reviews every submission carefully — if there's alignment, you'll hear from us regarding next steps.</p>
+      <div class="confirm-note" id="confirmNote">Heads up: we had trouble saving one of your video responses. Our team may reach out so you can resend it — no need to start over.</div>
     </div>
   </div>
 </div>
@@ -1514,6 +1640,16 @@
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   window.scrollTo(0, 0);
 
+  // ---- Endpoints / config ----
+  const PRESIGN_URL = 'https://n8n-production-f881.up.railway.app/webhook/r2-presign';
+  const SUBMIT_URL  = 'https://n8n-production-f881.up.railway.app/webhook/bf3f4439-0d59-49ed-ad32-57fa54f75d88';
+
+  // ---- Upload tuning ----
+  const UPLOAD_MAX_ATTEMPTS = 3;     // PUT retries before we surface a failure
+  const UPLOAD_TIMEOUT_MS   = 180000; // 3 min per attempt (files are now bitrate-capped)
+  const REC_VIDEO_BITRATE   = 2500000; // ~2.5 Mbps — 90s clip lands ~20MB, not ~80MB
+  const REC_AUDIO_BITRATE   = 128000;
+
   // NAV scroll state
   const nav = document.getElementById('nav');
   const onScroll = () => {
@@ -1540,8 +1676,10 @@
     heroIO.observe(heroEl);
   }
   const submitBtn = document.getElementById('submitBtn');
+  const submitLabel = document.getElementById('submitLabel');
   const submitErr = document.getElementById('submitErr');
   const confirmEl = document.getElementById('confirm');
+  const confirmNote = document.getElementById('confirmNote');
 
   // Phone formatting: (555) 555-5555
   const phoneInput = document.getElementById('phone');
@@ -1654,10 +1792,142 @@
     window.__dpTrigger = dpTrigger;
   })();
 
-  // Track recorded blobs per video target (for previews when File API not assignable)
+  // =========================================================
+  // VIDEO HANDLING — upload-on-record/select, background, with state
+  // =========================================================
+  // Per-video upload state. status: idle | uploading | uploaded | failed
+  const uploadState = {
+    'video-apply':   { status:'idle', url:'', file:null, lastError:'' },
+    'video-mindset': { status:'idle', url:'', file:null, lastError:'' }
+  };
+
+  // Track recorded blobs per target (fallback when File API not assignable)
   const recordedBlobs = {};
 
-  // Apply a file (from upload OR recording) to a video field
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  function statusEls(targetId){
+    const fileInput = document.getElementById(targetId);
+    const wrap = fileInput.closest('.video');
+    return {
+      wrap,
+      box:   wrap.querySelector('.v-upload-status'),
+      bar:   wrap.querySelector('.v-progress-bar'),
+      text:  wrap.querySelector('.v-status-text'),
+      retry: wrap.querySelector('.v-retry-upload')
+    };
+  }
+
+  function setProgress(targetId, pct){
+    const { bar } = statusEls(targetId);
+    if (bar) bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+  }
+
+  function renderUploadStatus(targetId){
+    const st = uploadState[targetId];
+    const { box, text } = statusEls(targetId);
+    if (!box) return;
+    box.setAttribute('data-status', st.status);
+    if (st.status === 'uploading'){
+      text.textContent = 'Securing your video…';
+    } else if (st.status === 'uploaded'){
+      text.textContent = 'Video saved. You\u2019re all set on this one.';
+    } else if (st.status === 'failed'){
+      text.textContent = 'We couldn\u2019t save your video — your connection may have dropped. Tap Retake to re-record, or Retry upload below.';
+    } else {
+      text.textContent = 'Preparing…';
+    }
+  }
+
+  // PUT to R2 with progress reporting
+  function putWithProgress(url, file, onProgress){
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', url);
+      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+      if (xhr.upload){
+        xhr.upload.onprogress = e => {
+          if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
+        };
+      }
+      xhr.onload = () => {
+        if (xhr.status === 200 || xhr.status === 204) resolve();
+        else reject(new Error('put_failed_' + xhr.status));
+      };
+      xhr.onerror = () => reject(new Error('network_error'));
+      xhr.ontimeout = () => reject(new Error('timeout'));
+      xhr.timeout = UPLOAD_TIMEOUT_MS;
+      xhr.send(file);
+    });
+  }
+
+  // Get a presigned URL, then PUT with retry/backoff. Returns the public URL.
+  async function uploadVideoToR2(file, fieldName, onProgress){
+    let presign = null;
+    let lastErr = null;
+    for (let attempt = 1; attempt <= UPLOAD_MAX_ATTEMPTS; attempt++){
+      try{
+        if (!presign){
+          const presignRes = await fetch(PRESIGN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fieldName, contentType: file.type || 'video/webm' })
+          });
+          if (!presignRes.ok) throw new Error('presign_failed_' + presignRes.status);
+          presign = await presignRes.json();
+          if (!presign || !presign.uploadUrl) throw new Error('presign_no_url');
+        }
+        if (onProgress) onProgress(0);
+        await putWithProgress(presign.uploadUrl, file, onProgress);
+        if (onProgress) onProgress(100);
+        return presign.publicUrl;
+      }catch(err){
+        lastErr = err;
+        // If the presign itself failed, force a fresh one next loop.
+        if (String(err.message || '').indexOf('presign') === 0) presign = null;
+        if (attempt < UPLOAD_MAX_ATTEMPTS) await sleep(attempt * 1200);
+      }
+    }
+    throw lastErr || new Error('upload_failed');
+  }
+
+  // Kick off (or re-kick) the background upload for a target.
+  async function startUpload(targetId){
+    const st = uploadState[targetId];
+    if (!st.file) return;
+    st.status = 'uploading';
+    setProgress(targetId, 0);
+    renderUploadStatus(targetId);
+    syncSubmitState();
+    try{
+      const url = await uploadVideoToR2(st.file, targetId, pct => setProgress(targetId, pct));
+      st.url = url;
+      st.status = 'uploaded';
+      st.lastError = '';
+      renderUploadStatus(targetId);
+      patchVideoUrls();
+    }catch(err){
+      st.status = 'failed';
+      st.url = '';
+      st.lastError = String((err && err.message) || err);
+      renderUploadStatus(targetId);
+    }
+    updateProgress();
+    syncSubmitState();
+  }
+
+  // Push current video URLs into telemetry form_data so a session is
+  // recoverable even if the final submit never reaches n8n.
+  function patchVideoUrls(){
+    if (window.__divinifyPatchFormData){
+      window.__divinifyPatchFormData({
+        video1_url: uploadState['video-apply'].url,
+        video2_url: uploadState['video-mindset'].url
+      });
+    }
+  }
+
+  // Apply a file (from upload OR recording) to a video field, then upload it.
   function applyVideoFile(targetId, file, blob){
     const fileInput = document.getElementById(targetId);
     const wrap = fileInput.closest('.video');
@@ -1681,6 +1951,12 @@
     }
     wrap.classList.add('ready');
     clearFieldError(fileInput);
+
+    // Store + start background upload immediately.
+    uploadState[targetId].file = file;
+    uploadState[targetId].url = '';
+    startUpload(targetId);
+
     updateProgress();
   }
 
@@ -1690,12 +1966,15 @@
     const previewEl = wrap.querySelector('.v-preview');
     fileInput.value = '';
     delete recordedBlobs[targetId];
+    uploadState[targetId] = { status:'idle', url:'', file:null, lastError:'' };
+    renderUploadStatus(targetId);
     if (previewEl){
       try{ if(previewEl.src) URL.revokeObjectURL(previewEl.src); }catch(e){}
       previewEl.removeAttribute('src');
       previewEl.load();
     }
     wrap.classList.remove('ready');
+    syncSubmitState();
   }
 
   // Upload-from-device handler
@@ -1708,11 +1987,10 @@
     });
   });
 
-  // Retake (reopens recorder if was recorded; otherwise prompts upload again)
+  // Retake (reopens recorder)
   document.querySelectorAll('.v-action.retake').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.target;
-      // Always reopen the recorder for retake — most natural flow
       clearVideo(target);
       openRecorder(target);
     });
@@ -1721,6 +1999,14 @@
     btn.addEventListener('click', () => {
       clearVideo(btn.dataset.target);
       updateProgress();
+    });
+  });
+
+  // Retry upload (re-PUT the same captured file, no re-record needed)
+  document.querySelectorAll('.v-retry-upload').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      if (uploadState[target].file) startUpload(target);
     });
   });
 
@@ -1801,13 +2087,25 @@
       return;
     }
     try{
-      stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
+      // Constrain to 720p so the file is upload-friendly. Applicants record
+      // exactly as long as they like — only the file SIZE is reduced, not length.
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+        audio: true
+      });
       preview.srcObject = stream;
       preview.play().catch(()=>{});
     }catch(err){
-      errorEl.textContent = 'Unable to access camera or microphone. Check browser permissions, or use the Upload option instead.';
-      errorEl.classList.add('show');
-      startBtn.hidden = true;
+      // Retry once with relaxed constraints before giving up.
+      try{
+        stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
+        preview.srcObject = stream;
+        preview.play().catch(()=>{});
+      }catch(err2){
+        errorEl.textContent = 'Unable to access camera or microphone. Check browser permissions, or use the Upload option instead.';
+        errorEl.classList.add('show');
+        startBtn.hidden = true;
+      }
     }
   }
 
@@ -1833,12 +2131,24 @@
     chunks = [];
     const candidates = ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm','video/mp4'];
     const mime = candidates.find(c => window.MediaRecorder && MediaRecorder.isTypeSupported(c));
+
+    // Build options with a bitrate cap; fall back progressively if rejected.
+    const opts = { videoBitsPerSecond: REC_VIDEO_BITRATE, audioBitsPerSecond: REC_AUDIO_BITRATE };
+    if (mime) opts.mimeType = mime;
     try{
-      recorder = mime ? new MediaRecorder(stream, { mimeType:mime }) : new MediaRecorder(stream);
+      recorder = new MediaRecorder(stream, opts);
     }catch(err){
-      errorEl.textContent = 'Recording is not supported in this browser. Please use the Upload option.';
-      errorEl.classList.add('show');
-      return;
+      try{
+        recorder = mime ? new MediaRecorder(stream, { mimeType:mime }) : new MediaRecorder(stream);
+      }catch(err2){
+        try{
+          recorder = new MediaRecorder(stream);
+        }catch(err3){
+          errorEl.textContent = 'Recording is not supported in this browser. Please use the Upload option.';
+          errorEl.classList.add('show');
+          return;
+        }
+      }
     }
     recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
     recorder.onstop = () => {
@@ -1854,6 +2164,7 @@
       retryBtn.hidden = false;
       useBtn.hidden   = false;
     };
+    // No timeslice — iOS Safari emits broken/empty fragments with one set.
     recorder.start();
     startBtn.hidden = true;
     stopBtn.hidden  = false;
@@ -1883,7 +2194,6 @@
     preview.muted = true;
     retryBtn.hidden = true;
     useBtn.hidden = true;
-    // Restart fresh stream
     stopStream();
     await openRecorder(currentTarget);
   });
@@ -1903,8 +2213,9 @@
     const ext = recordedBlob.type.includes('mp4') ? 'mp4' : 'webm';
     const filename = `${currentTarget}-recording.${ext}`;
     const file = new File([recordedBlob], filename, { type: recordedBlob.type });
-    applyVideoFile(currentTarget, file, recordedBlob);
+    const target = currentTarget;
     closeRecorder();
+    applyVideoFile(target, file, file);
   });
 
   // -----------------------------
@@ -1919,7 +2230,7 @@
       return Array.from(group).some(r => r.checked);
     }
     if (el.type === 'file'){
-      return !!(el.files && el.files[0]) || !!recordedBlobs[el.id];
+      return !!(el.files && el.files[0]) || !!recordedBlobs[el.id] || !!uploadState[el.id]?.file;
     }
     const v = (el.value || '').trim();
     if (!v) return false;
@@ -1962,6 +2273,11 @@
 
   function isStepComplete(stepEl){
     const required = stepEl.querySelectorAll('[required]');
+    // Step 2 (videos) has no [required] inputs now — gauge by captured files.
+    const videoInputs = stepEl.querySelectorAll('input[type="file"].video-file');
+    if (videoInputs.length){
+      return Array.from(videoInputs).every(v => !!uploadState[v.id]?.file);
+    }
     if (!required.length) return false;
     const groupsSeen = new Set();
     for (const el of required){
@@ -2011,41 +2327,59 @@
   updateProgress();
   updateCurrentStep();
 
+  // -----------------------------
   // SUBMIT
-  async function uploadVideoToR2(file, fieldName) {
-    const presignRes = await fetch('https://n8n-production-f881.up.railway.app/webhook/r2-presign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fieldName, contentType: file.type })
-    });
-    if (!presignRes.ok) throw new Error('Could not get upload URL');
-    const { uploadUrl, publicUrl } = await presignRes.json();
-    // XHR instead of fetch for the binary PUT — fetch drops large binary
-    // bodies silently on iOS Safari; XHR is far more reliable on mobile.
-    await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('PUT', uploadUrl);
-      xhr.setRequestHeader('Content-Type', file.type);
-      xhr.onload = () => {
-        if (xhr.status === 200) resolve();
-        else reject(new Error('Upload failed: ' + xhr.status));
-      };
-      xhr.onerror = () => reject(new Error('Network error during upload'));
-      xhr.ontimeout = () => reject(new Error('Upload timed out'));
-      xhr.timeout = 120000;
-      xhr.send(file);
-    });
-    return publicUrl;
-  }
-form.addEventListener('submit', async e => {
-    e.preventDefault();
-  submitBtn.disabled = true;
-    submitErr.classList.remove('show');
+  // -----------------------------
+  const VIDS = ['video-apply','video-mindset'];
+  let forceSubmit = false;   // set true after we've warned about a missing video
 
+  function anyUploading(){ return VIDS.some(t => uploadState[t].status === 'uploading'); }
+  function missingVideos(){ return VIDS.filter(t => !uploadState[t].url); }
+
+  // Keep the submit button honest about current upload state.
+  function syncSubmitState(){
+    if (anyUploading()){
+      submitLabel.textContent = 'Finishing upload…';
+      submitBtn.disabled = true;
+    } else {
+      submitBtn.disabled = false;
+      // Restore the label unless we're mid "submit anyway" prompt.
+      if (!forceSubmit) submitLabel.textContent = 'Submit Application';
+    }
+    // If both videos are now saved, drop any earlier "submit anyway" state.
+    if (missingVideos().length === 0){
+      forceSubmit = false;
+      submitLabel.textContent = anyUploading() ? 'Finishing upload…' : 'Submit Application';
+      if (submitErr.classList.contains('info')) {
+        submitErr.classList.remove('show','info');
+      }
+    }
+  }
+
+  function captureSubmitError(err){
+    const msg = String((err && err.message) || err);
+    const conn = (navigator.connection && navigator.connection.effectiveType) || 'unknown';
+    const mb = f => f ? (Math.round((f.size/1048576)*10)/10) + 'MB' : 'none';
+    const a = uploadState['video-apply'];
+    const m = uploadState['video-mindset'];
+    const detail = msg
+      + ' | conn=' + conn
+      + ' | v1=' + a.status + '/' + mb(a.file) + (a.url ? '/saved' : '') + (a.lastError ? '/' + a.lastError : '')
+      + ' | v2=' + m.status + '/' + mb(m.file) + (m.url ? '/saved' : '') + (m.lastError ? '/' + m.lastError : '');
+    if (window.__divinifyPatchNow){
+      window.__divinifyPatchNow({ submit_error: detail, submit_error_at: new Date().toISOString() });
+    }
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    submitErr.classList.remove('show','info');
+
+    // 1) Validate the non-video required fields (name/phone/email/transport/start)
     let firstBad = null;
     const seenRadioGroups = new Set();
-
     form.querySelectorAll('[required]').forEach(el => {
+      if (el.type === 'file') return; // videos handled separately
       if (el.type === 'radio'){
         if (seenRadioGroups.has(el.name)) return;
         seenRadioGroups.add(el.name);
@@ -2061,76 +2395,94 @@ form.addEventListener('submit', async e => {
         if (!ok && !firstBad) firstBad = el.closest('.field');
       }
     });
-
     if (firstBad){
+      submitErr.textContent = 'Please complete all required fields before submitting.';
       submitErr.classList.add('show');
       firstBad.scrollIntoView({ behavior:'smooth', block:'center' });
-      submitBtn.disabled = false;  // re-enable on validation error
       return;
     }
 
-    // Upload videos then POST to n8n — wrapped so any failure is visible
+    // 2) If a video is still uploading, ask them to wait (don't lose it).
+    if (anyUploading()){
+      submitErr.textContent = 'Your video is still uploading — give it a moment, the button will be ready in a few seconds.';
+      submitErr.classList.add('show','info');
+      return;
+    }
+
+    // 3) Soft gate on missing/failed videos. Warn strongly once, then allow through.
+    const missing = missingVideos();
+    if (missing.length && !forceSubmit){
+      const firstVid = document.getElementById(missing[0]);
+      const which = missing.length > 1 ? 'both video responses' : 'one of your video responses';
+      submitErr.textContent = 'We weren\u2019t able to save ' + which + '. We strongly recommend re-recording — scroll up and tap Retake or Retry upload. If you keep having trouble, tap Submit again and we\u2019ll receive your application without it.';
+      submitErr.classList.add('show');
+      submitLabel.textContent = 'Submit Anyway';
+      forceSubmit = true;
+      if (firstVid) firstVid.closest('.field').scrollIntoView({ behavior:'smooth', block:'center' });
+      return;
+    }
+
+    // 4) Proceed with submission.
+    submitBtn.disabled = true;
+    submitLabel.textContent = 'Submitting…';
     try {
-    const data = new FormData(form);
-    const videoApplyFile = document.getElementById('video-apply').files[0] || recordedBlobs['video-apply']?.file;
-    const videoMindsetFile = document.getElementById('video-mindset').files[0] || recordedBlobs['video-mindset']?.file;
-    const [video_apply_url, video_mindset_url] = await Promise.all([
-      videoApplyFile ? uploadVideoToR2(videoApplyFile, 'video-apply') : Promise.resolve(''),
-      videoMindsetFile ? uploadVideoToR2(videoMindsetFile, 'video-mindset') : Promise.resolve('')
-    ]);
+      const data = new FormData(form);
+      const video_apply_url   = uploadState['video-apply'].url   || 'MISSING';
+      const video_mindset_url = uploadState['video-mindset'].url || 'MISSING';
+      const missingNow = missingVideos();
 
-    // Patch video URLs into telemetry form_data so the recruiter dashboard
-    // can flag "recoverable" sessions (videos uploaded, submit didn't reach n8n).
-    if (window.__divinifyPatchFormData) {
-      window.__divinifyPatchFormData({
-        video1_url: video_apply_url,
-        video2_url: video_mindset_url
-      });
-    }
+      // Telemetry: record URLs + a missing flag for the recruiter dashboard.
+      if (window.__divinifyPatchFormData){
+        window.__divinifyPatchFormData({
+          video1_url: uploadState['video-apply'].url,
+          video2_url: uploadState['video-mindset'].url,
+          video_missing: missingNow.length > 0,
+          video_missing_which: missingNow.join(',')
+        });
+      }
 
-    await fetch('https://n8n-production-f881.up.railway.app/webhook/bf3f4439-0d59-49ed-ad32-57fa54f75d88', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: data.get('name'),
-        phone: data.get('phone'),
-        email: data.get('email'),
-        transport: data.get('transport'),
-        start: data.get('start'),
-        video_apply: video_apply_url,
-        video_mindset: video_mindset_url
-      })
-    });
-
-    // Mark telemetry session as successfully submitted.
-    if (window.__divinifyTelemetry) {
-      const SUPA_URL = 'https://qugurstoyditcfhmmmrs.supabase.co';
-      const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1Z3Vyc3RveWRpdGNmaG1tbXJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MjI2NDQsImV4cCI6MjA4ODM5ODY0NH0.YwTAaudN4ZQDzdRF3PXttZYedPuY_Vhydd7aBoT9TX4';
-      fetch(SUPA_URL + '/rest/v1/lead_sessions?session_id=eq.' + window.__divinifyTelemetry.sessionId, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPA_KEY,
-          'Authorization': 'Bearer ' + SUPA_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
+      const resp = await fetch(SUBMIT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          submitted: true,
-          ended_at: new Date().toISOString()
+          name: data.get('name'),
+          phone: data.get('phone'),
+          email: data.get('email'),
+          transport: data.get('transport'),
+          start: data.get('start'),
+          video_apply: video_apply_url,
+          video_mindset: video_mindset_url
         })
-      }).catch(function(err) { console.warn('[telemetry] success patch failed', err); });
-    }
+      });
+      if (!resp.ok) throw new Error('submit_webhook_failed_' + resp.status);
 
-    form.classList.add('hidden');
-    progEl.classList.add('hidden');
-    confirmEl.classList.add('show');
-    window.scrollTo({ top:0, behavior:'smooth' });
+      // Mark telemetry session as successfully submitted (immediate, survives unload).
+      if (window.__divinifyPatchNow){
+        window.__divinifyPatchNow({
+          submitted: true,
+          ended_at: new Date().toISOString(),
+          video_missing: missingNow.length > 0
+        });
+      }
+
+      form.classList.add('hidden');
+      progEl.classList.add('hidden');
+      if (missingNow.length) confirmNote.classList.add('show');
+      confirmEl.classList.add('show');
+      window.scrollTo({ top:0, behavior:'smooth' });
     } catch(err) {
+      console.error('[submit] failed:', err);
+      captureSubmitError(err);
       submitBtn.disabled = false;
-      submitErr.textContent = 'Something went wrong uploading your videos. Please check your connection and try again.';
+      forceSubmit = false; // let them try the normal flow again
+      submitLabel.textContent = 'Submit Application';
+      submitErr.textContent = 'Something went wrong sending your application. Please check your connection and tap Submit again.';
       submitErr.classList.add('show');
     }
   });
+
+  // Initial state sync
+  syncSubmitState();
 </script>
 </body>
 </html>

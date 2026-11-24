@@ -1,5 +1,6 @@
 {
+  "cleanUrls": true,
   "rewrites": [
-    { "source": "/firstroundinterview", "destination": "/interview.html" }
+    { "source": "/firstroundinterview", "destination": "/interview" }
   ]
 }

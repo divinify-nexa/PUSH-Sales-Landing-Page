@@ -1139,6 +1139,33 @@
     .submit-wrap{padding:40px 0 96px;}
     .submit-copy{font-size:15px;}
   }
+  /* SMS consent (A2P) — scoped to the submit area */
+  .sms-consent{
+    width:calc(100% - 44px); max-width:480px;
+    margin:0 auto 24px; padding:18px 18px 16px;
+    border:1px solid var(--line-2); background:rgba(255,255,255,.03);
+    text-align:left;
+  }
+  .sms-consent h3{
+    font-family:var(--sans); font-size:15px; font-weight:600;
+    letter-spacing:normal; text-transform:none; color:var(--off);
+    margin:0 0 12px;
+  }
+  .sms-consent-row{display:flex; align-items:flex-start; gap:12px; cursor:pointer;}
+  .sms-consent-row input[type="checkbox"]{
+    flex:0 0 auto; width:20px; height:20px; margin:2px 0 0;
+    accent-color:var(--gold); cursor:pointer;
+  }
+  .sms-consent-row span{
+    font-family:var(--sans); font-size:13.5px; line-height:1.6;
+    letter-spacing:normal; text-transform:none; color:var(--plat);
+  }
+  .submit-legal{
+    margin:16px 0 0; font-family:var(--sans); font-size:14px;
+    letter-spacing:normal; text-transform:none; color:var(--plat);
+  }
+  .submit-legal a{color:var(--off); text-decoration:underline; text-underline-offset:3px;}
+  .submit-legal a:hover{color:var(--gold-soft);}
   .submit-btn{
     position:relative;
     display:inline-flex; align-items:center; justify-content:center; gap:18px;
@@ -1587,10 +1614,18 @@
   <!-- SUBMIT -->
   <div class="submit-wrap">
     <p class="submit-copy">Our team reviews every submission carefully. If there's alignment, you'll hear from us regarding next steps.</p>
+    <div class="sms-consent">
+      <h3>SMS Consent (optional)</h3>
+      <label class="sms-consent-row" for="sms_consent">
+        <input type="checkbox" id="sms_consent" name="sms_consent" value="yes">
+        <span id="smsConsentText">I agree to receive SMS messages from Push Sales about interview scheduling and reminders, application status updates, and replies to my inquiries at the phone number provided. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help. Consent is not a condition of employment. See our Privacy Policy and Terms and Conditions, linked directly below this form.</span>
+      </label>
+    </div>
     <button type="submit" class="submit-btn" id="submitBtn">
       <span id="submitLabel">Submit Application</span>
       <span class="arrow"></span>
     </button>
+    <p class="submit-legal"><a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms and Conditions</a></p>
     <div class="submit-err" id="submitErr">Please complete all required fields before submitting.</div>
   </div>
 
@@ -2404,6 +2439,24 @@
     }
   }
 
+  // SMS consent (optional). Never blocks or alters the submit flow.
+  const smsConsentEl = document.getElementById('sms_consent');
+  function smsConsentFields(){
+    if (!smsConsentEl || !smsConsentEl.checked) return { sms_consent: 'no' };
+    return {
+      sms_consent: 'yes',
+      sms_consent_text: document.getElementById('smsConsentText').textContent.trim(),
+      sms_consent_at: new Date().toISOString()
+    };
+  }
+  // Telemetry records el.value ("yes") for checkboxes even when unchecked;
+  // overwrite with the real state so the dashboard never shows false consent.
+  if (smsConsentEl) smsConsentEl.addEventListener('change', () => {
+    if (window.__divinifyPatchFormData){
+      window.__divinifyPatchFormData({ sms_consent: smsConsentEl.checked ? 'yes' : 'no' });
+    }
+  });
+
   form.addEventListener('submit', async e => {
     e.preventDefault();
     submitErr.classList.remove('show','info');
@@ -2484,7 +2537,8 @@
           transport: data.get('transport'),
           start: data.get('start'),
           video_apply: video_apply_url,
-          video_mindset: video_mindset_url
+          video_mindset: video_mindset_url,
+          ...smsConsentFields()
         })
       });
       if (!resp.ok) throw new Error('submit_webhook_failed_' + resp.status);

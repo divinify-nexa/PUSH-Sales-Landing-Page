@@ -145,6 +145,10 @@ textarea.input{min-height:130px; resize:vertical;}
 .form-legal{margin-top:16px; text-align:center; font-size:14px; color:#111;}
 .form-legal a{color:#111; text-decoration:underline; text-underline-offset:3px;}
 .form-legal a:hover{color:var(--gold-dark);}
+.submit:disabled{opacity:.6; cursor:wait; transform:none;}
+.form-error{margin-top:12px; text-align:center; font-size:14px; font-weight:600; color:#a1271b;}
+.form-error:empty{display:none;}
+.hp{position:absolute !important; left:-10000px; width:1px; height:1px; overflow:hidden;}
 .form-success{
   display:none;
   text-align:center; padding:40px 10px;

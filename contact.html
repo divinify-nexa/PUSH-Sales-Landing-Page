@@ -91,8 +91,15 @@
         </label>
       </div>
 
+      <!-- Formspree honeypot: hidden from people, bots fill it and get dropped -->
+      <div class="hp" aria-hidden="true">
+        <label for="_gotcha">Leave this field empty</label>
+        <input type="text" id="_gotcha" name="_gotcha" tabindex="-1" autocomplete="off">
+      </div>
+
       <button type="submit" class="submit">Submit</button>
       <p class="form-legal"><a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms and Conditions</a></p>
+      <p class="form-error" id="form-error" role="alert"></p>
     </form>
     <div class="form-success" id="form-success" role="status" tabindex="-1">Thanks — we'll be in touch.</div>
   </div>
@@ -173,24 +180,36 @@
   // either way; the checkbox is never required to submit.
   function buildPayload(){
     const smsChecked = form.elements.sms_consent.checked;
-    return {
+    const payload = {
       first_name: form.elements.first_name.value.trim(),
       last_name: form.elements.last_name.value.trim(),
       email: form.elements.email.value.trim(),
       phone: form.elements.phone.value.trim(),
       interest: form.elements.interest.value,
       message: form.elements.message.value.trim(),
-      sms_consent: smsChecked ? 'yes' : 'no',
-      sms_consent_text: smsChecked ? form.querySelector('.consent-row span').textContent.trim() : '',
-      sms_consent_timestamp: smsChecked ? new Date().toISOString() : '',
-      page_url: location.href,
-      submitted_at: new Date().toISOString()
+      sms_consent: smsChecked ? 'yes' : 'no'
     };
+    if (smsChecked){
+      payload.sms_consent_text = form.querySelector('.consent-row span').textContent.trim();
+      payload.sms_consent_at = new Date().toISOString();
+    }
+    payload.form_source = 'contact';
+    payload.page_url = location.href;
+    payload._subject = 'New website inquiry \u2013 ' + payload.first_name + ' ' + payload.last_name;
+    payload._gotcha = form.elements._gotcha.value;
+    return payload;
   }
   window.__buildContactPayload = buildPayload; // exposed for QA
 
-  form.addEventListener('submit', function(e){
+  const FORMSPREE_URL = 'https://formspree.io/f/xppdkbgv';
+  const submitBtn = form.querySelector('.submit');
+  const formError = document.getElementById('form-error');
+  let sending = false;
+
+  form.addEventListener('submit', async function(e){
     e.preventDefault();
+    if (sending) return;
+    formError.textContent = '';
     let firstBad = null;
     Object.keys(REQUIRED).forEach(name => {
       const el = form.elements[name];
@@ -202,19 +221,28 @@
 
     const payload = buildPayload();
 
-    // TODO(form-provider): connect delivery here (Formspree, Web3Forms, or similar).
-    // Example:
-    //   await fetch('https://formspree.io/f/<FORM_ID>', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    //     body: JSON.stringify(payload)
-    //   });
-    // Until then, nothing is sent anywhere.
-    void payload;
-
-    form.style.display = 'none';
-    success.classList.add('show');
-    success.focus();
+    sending = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending\u2026';
+    try {
+      const resp = await fetch(FORMSPREE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error('formspree_' + resp.status);
+      form.reset();
+      form.style.display = 'none';
+      success.classList.add('show');
+      success.focus();
+    } catch (err) {
+      console.error('[contact] submit failed:', err);
+      formError.textContent = 'Something went wrong. Please email hiring@pushsales.co.';
+    } finally {
+      sending = false;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit';
+    }
   });
 })();
 </script>
